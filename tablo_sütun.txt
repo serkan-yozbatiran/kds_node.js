@@ -1,0 +1,68 @@
+Vritabanı ismi: kentsel_donusum_db
+kullanıcı adı: root
+şifre ise yok
+
+tablolar ve içerisindeki sütun isimleri
+
+tablo adı: binalar
+sütun isimleri:
+bina_id
+mahalle_adi
+mahalle_id
+ada_no
+parsel_no
+bina_yasi
+kat_sayisi
+yapi_turu
+risk_puani
+risk_kategorisi
+yapim_yili
+etap_id
+etap_adi
+
+tablo adı:donusum_plani
+sütun isimleri:
+plan_id
+bina_id
+yikim_suresi_gun
+yapim_suresi_ay
+en_uygun_mevsim
+tahmini_maliyet
+
+tablo adı: hak_sahipleri
+sütun işimleri:
+hak_sahibi_id
+bina_id
+tc_kimlik_no
+ad
+soyad
+yas
+gelir_duzeyi
+talep_edilen_model
+istenen_konut_tipi
+
+tablo adı: hukuki_durum
+sütun isimleri:
+id
+bina_id
+mulkiyet_tipi
+dava_durumu
+hissedar_sayisi
+
+tablo adı: mahalleler
+sütun isimleri:
+mahalle_id
+mahalle_adi
+nufus
+erkek_nufus
+kadin_nufus
+alan_hektar
+yogunluk
+zemin_risk_puani
+ortalama_bina_riski
+yogunluk_puani
+zemin_aciklamasi
+zemin_kategorisi
+risk_puani
+risk_kategorisi
+
