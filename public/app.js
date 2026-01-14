@@ -8,7 +8,7 @@ let charts = {};
 
 // Etap renkleri
 const ETAP_COLORS = [
-    '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', 
+    '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
     '#06b6d4', '#f43f5e', '#84cc16', '#ec4899', '#14b8a6'
 ];
 
@@ -97,7 +97,7 @@ async function loadStatistics() {
         // Yüksek riskli toplam
         const totalRiskli = allMahalleler.reduce((sum, m) => sum + (m.yuksek_risk || 0) + (m.cok_yuksek_risk || 0), 0);
         document.getElementById('totalRiskli').textContent = totalRiskli.toLocaleString('tr-TR');
-        
+
     } catch (error) {
         console.error('Veri yüklenemedi:', error);
     }
@@ -116,14 +116,14 @@ async function loadMahalleSinirlari() {
             style: () => ({ fillColor: COLORS.mahalleFill, fillOpacity: 0.6, color: COLORS.mahalleStroke, weight: 2 }),
             onEachFeature: (feature, layer) => {
                 const props = feature.properties;
-                layer.on('mouseover', function() {
+                layer.on('mouseover', function () {
                     if (currentMahalle) return;
                     this.setStyle({ fillColor: COLORS.mahalleHoverFill, fillOpacity: 0.8, color: '#fff', weight: 3 });
                     this.bringToFront();
                     showMahalleName(props.name);
                     showInfoPanel(props);
                 });
-                layer.on('mouseout', function() {
+                layer.on('mouseout', function () {
                     if (currentMahalle) return;
                     this.setStyle({ fillColor: COLORS.mahalleFill, fillOpacity: 0.6, color: COLORS.mahalleStroke, weight: 2 });
                     hideMahalleName();
@@ -186,7 +186,7 @@ async function selectMahalle(mahalleAd) {
     try {
         const etapResponse = await fetch(`/api/mahalle/${encodeURIComponent(mahalleAd)}/etaplar`);
         const etapData = await etapResponse.json();
-        
+
         if (etapData.etaplar && etapData.etaplar.length > 0) {
             // Etap verileri var, etapları göster
             const etapColors = {};
@@ -204,7 +204,7 @@ async function selectMahalle(mahalleAd) {
                     // Obje formatında ise etap adına göre eriş
                     etapBinalar = etapData.binalar[etap.etap_adi] || [];
                 }
-                
+
                 if (etapBinalar && etapBinalar.length > 0) {
                     const geoLayer = L.geoJSON(etapBinalar, {
                         style: f => ({
@@ -216,21 +216,21 @@ async function selectMahalle(mahalleAd) {
                         onEachFeature: (f, layer) => {
                             const bina = f.properties;
                             layer.options.binaData = { ...bina, etap_adi: etap.etap_adi };
-                            
-                            layer.on('mouseover', function() { 
+
+                            layer.on('mouseover', function () {
                                 if (currentEtap && currentEtap !== etap.etap_adi) return;
-                                this.setStyle({ weight: 3, fillOpacity: 0.95, color: '#fff' }); 
+                                this.setStyle({ weight: 3, fillOpacity: 0.95, color: '#fff' });
                                 this.bringToFront();
                                 if (!currentEtap) {
                                     showEtapInfo(etapData.etaplar.find(e => e.etap_adi === etap.etap_adi) || { etap_adi: etap.etap_adi });
                                 }
                             });
-                            layer.on('mouseout', function() { 
+                            layer.on('mouseout', function () {
                                 if (currentEtap && currentEtap !== etap.etap_adi) return;
                                 const color = currentEtap ? this.options.riskColor : this.options.etapColor;
-                                this.setStyle({ weight: 1, fillOpacity: currentEtap ? 0.8 : 0.7, color: color }); 
+                                this.setStyle({ weight: 1, fillOpacity: currentEtap ? 0.8 : 0.7, color: color });
                             });
-                            layer.on('click', function() {
+                            layer.on('click', function () {
                                 if (!currentEtap) {
                                     // Etap seçilmemişse, etabı seç
                                     selectEtap(mahalleAd, etap.etap_adi, etapData);
@@ -241,12 +241,12 @@ async function selectMahalle(mahalleAd) {
                             });
                         }
                     });
-                    
+
                     geoLayer.options.etapAdi = etap.etap_adi;
                     geoLayer.addTo(binalarLayer);
                 }
             });
-            
+
             // Legend'ı göster
             document.getElementById('legend').classList.add('visible');
         } else {
@@ -255,16 +255,16 @@ async function selectMahalle(mahalleAd) {
             const data = await response.json();
 
             L.geoJSON(data, {
-                style: f => ({ 
-                    color: getBuildingColor(f.properties.risk_kategorisi), 
-                    weight: 1.5, 
-                    fillColor: getBuildingColor(f.properties.risk_kategorisi), 
-                    fillOpacity: 0.7 
+                style: f => ({
+                    color: getBuildingColor(f.properties.risk_kategorisi),
+                    weight: 1.5,
+                    fillColor: getBuildingColor(f.properties.risk_kategorisi),
+                    fillOpacity: 0.7
                 }),
                 onEachFeature: (f, layer) => {
                     const p = f.properties;
-                    layer.on('mouseover', function() { this.setStyle({ weight: 3, fillOpacity: 0.95, color: '#fff' }); this.bringToFront(); });
-                    layer.on('mouseout', function() { this.setStyle({ weight: 1.5, fillOpacity: 0.7, color: getBuildingColor(p.risk_kategorisi) }); });
+                    layer.on('mouseover', function () { this.setStyle({ weight: 3, fillOpacity: 0.95, color: '#fff' }); this.bringToFront(); });
+                    layer.on('mouseout', function () { this.setStyle({ weight: 1.5, fillOpacity: 0.7, color: getBuildingColor(p.risk_kategorisi) }); });
                     layer.on('click', () => showBuildingDetails(p));
                 }
             }).addTo(binalarLayer);
@@ -290,12 +290,12 @@ function showEtapInfo(props) {
 
 function resetEtapSelection() {
     if (!currentEtap) return;
-    
+
     currentEtap = null;
     showMahalleName(currentMahalle);
     updateBackButtonVisibility();
     loadFinancialSummary();
-    
+
     // Legend'ı etaplara geri çevir
     document.getElementById('legendTitle').textContent = 'Etaplar';
     document.getElementById('legendContent').innerHTML = `
@@ -306,15 +306,15 @@ function resetEtapSelection() {
         <div class="legend-item"><div class="legend-color" style="background:#8b5cf6"></div>Etap 5</div>
         <div class="legend-item"><div class="legend-color" style="background:#06b6d4"></div>Etap 6</div>
     `;
-    
+
     // Binaları normale döndür (etap rengine geri dön)
     binalarLayer.eachLayer(geoLayer => {
         if (geoLayer.eachLayer) {
             geoLayer.eachLayer(layer => {
                 const etapColor = layer.options?.etapColor;
                 if (etapColor) {
-                    layer.setStyle({ 
-                        fillOpacity: 0.7, 
+                    layer.setStyle({
+                        fillOpacity: 0.7,
                         opacity: 1,
                         weight: 1,
                         fillColor: etapColor,
@@ -325,8 +325,8 @@ function resetEtapSelection() {
         } else {
             const etapColor = geoLayer.options?.etapColor;
             if (etapColor) {
-                geoLayer.setStyle({ 
-                    fillOpacity: 0.7, 
+                geoLayer.setStyle({
+                    fillOpacity: 0.7,
                     opacity: 1,
                     weight: 1,
                     fillColor: etapColor,
@@ -335,18 +335,18 @@ function resetEtapSelection() {
             }
         }
     });
-    
+
     hideInfoPanel();
 }
 
 function resetEtapSelection() {
     if (!currentEtap) return;
-    
+
     currentEtap = null;
     showMahalleName(currentMahalle);
     updateBackButtonVisibility();
     loadFinancialSummary();
-    
+
     // Legend'ı etaplara geri çevir
     document.getElementById('legendTitle').textContent = 'Etaplar';
     document.getElementById('legendContent').innerHTML = `
@@ -357,7 +357,7 @@ function resetEtapSelection() {
         <div class="legend-item"><div class="legend-color" style="background:#8b5cf6"></div>Etap 5</div>
         <div class="legend-item"><div class="legend-color" style="background:#06b6d4"></div>Etap 6</div>
     `;
-    
+
     // Binaları tekrar yükle (etap renkleriyle)
     if (currentMahalle) {
         selectMahalle(currentMahalle);
@@ -391,11 +391,11 @@ async function selectEtap(mahalleAd, etapAdi, etapData) {
             geoLayer.eachLayer(layer => {
                 const binaEtap = layer.options?.etapAdi;
                 const riskColor = layer.options?.riskColor;
-                
+
                 if (binaEtap === etapAdi && riskColor) {
                     // SEÇİLİ ETABIN BİNALARI - Risk rengine dönüş
-                    layer.setStyle({ 
-                        fillOpacity: 0.85, 
+                    layer.setStyle({
+                        fillOpacity: 0.85,
                         opacity: 1,
                         weight: 1.5,
                         fillColor: riskColor,
@@ -404,8 +404,8 @@ async function selectEtap(mahalleAd, etapAdi, etapData) {
                     layer.bringToFront();
                 } else if (binaEtap) {
                     // DİĞER BİNALAR - Çok soluk
-                    layer.setStyle({ 
-                        fillOpacity: 0.1, 
+                    layer.setStyle({
+                        fillOpacity: 0.1,
                         opacity: 0.2,
                         weight: 0.3
                     });
@@ -415,10 +415,10 @@ async function selectEtap(mahalleAd, etapAdi, etapData) {
             // Tek layer ise
             const binaEtap = geoLayer.options?.etapAdi;
             const riskColor = geoLayer.options?.riskColor;
-            
+
             if (binaEtap === etapAdi && riskColor) {
-                geoLayer.setStyle({ 
-                    fillOpacity: 0.85, 
+                geoLayer.setStyle({
+                    fillOpacity: 0.85,
                     opacity: 1,
                     weight: 1.5,
                     fillColor: riskColor,
@@ -426,8 +426,8 @@ async function selectEtap(mahalleAd, etapAdi, etapData) {
                 });
                 geoLayer.bringToFront();
             } else if (binaEtap) {
-                geoLayer.setStyle({ 
-                    fillOpacity: 0.1, 
+                geoLayer.setStyle({
+                    fillOpacity: 0.1,
                     opacity: 0.2,
                     weight: 0.3
                 });
@@ -448,18 +448,18 @@ function showBuildingDetails(p) {
     const etapInfo = p.etap_adi ? ` | ${p.etap_adi}` : '';
     document.getElementById('buildingType').textContent = `${p.yapi_turu || '-'} - ${p.mahalle_adi || ''}${etapInfo}`;
     const emoji = { 'Düşük': '🟢', 'Orta': '🟡', 'Yüksek': '🔴', 'Çok Yüksek': '⛔' }[p.risk_kategorisi] || '🟢';
-    
+
     const details = [
-        ['ID', p.bina_id], 
-        ['Mahalle', p.mahalle_adi || '-'], 
+        ['ID', p.bina_id],
+        ['Mahalle', p.mahalle_adi || '-'],
         ['Etap', p.etap_adi || '-'],
         ['Risk', `${emoji} ${p.risk_kategorisi}`],
-        ['Puan', p.risk_puani || 0], 
-        ['Yapı', p.yapi_turu || '-'], 
+        ['Puan', p.risk_puani || 0],
+        ['Yapı', p.yapi_turu || '-'],
         ['Kat', p.kat_sayisi || '-'],
         ['Yaş', p.bina_yasi ? `${p.bina_yasi} yıl` : '-']
     ];
-    
+
     document.getElementById('buildingDetails').innerHTML = details
         .map(([l, v]) => `<div class="detail-item"><div class="detail-label">${l}</div><div class="detail-value">${v}</div></div>`)
         .join('');
@@ -506,14 +506,14 @@ async function loadMahalleSinirlari() {
             style: () => ({ fillColor: COLORS.mahalleFill, fillOpacity: 0.6, color: COLORS.mahalleStroke, weight: 2 }),
             onEachFeature: (feature, layer) => {
                 const props = feature.properties;
-                layer.on('mouseover', function() {
+                layer.on('mouseover', function () {
                     if (currentMahalle) return;
                     this.setStyle({ fillColor: COLORS.mahalleHoverFill, fillOpacity: 0.8, color: '#fff', weight: 3 });
                     this.bringToFront();
                     showMahalleName(props.name);
                     showInfoPanel(props);
                 });
-                layer.on('mouseout', function() {
+                layer.on('mouseout', function () {
                     if (currentMahalle) return;
                     this.setStyle({ fillColor: COLORS.mahalleFill, fillOpacity: 0.6, color: COLORS.mahalleStroke, weight: 2 });
                     hideMahalleName();
@@ -589,7 +589,7 @@ async function selectMahalle(mahalleAd) {
     if (mahalleSinirlari) {
         const selected = mahalleSinirlari.features.find(f => f.properties.name === mahalleAd);
         if (selected) {
-            L.geoJSON(selected, { 
+            L.geoJSON(selected, {
                 style: { fillOpacity: 0, color: '#fff', weight: 3 },
                 onEachFeature: (f, layer) => {
                     // Mahalle sınırına tıklanınca etap seçimini sıfırla
@@ -611,7 +611,7 @@ async function selectMahalle(mahalleAd) {
 
         // Etap sınırları ve binaları varsa
         if (etapData.etap_sinirlari && etapData.etap_sinirlari.features.length > 0) {
-            
+
             // Etap sınırlarını görünmez olarak ekle (sadece tıklama için)
             L.geoJSON(etapData.etap_sinirlari, {
                 style: (feature) => ({
@@ -622,7 +622,7 @@ async function selectMahalle(mahalleAd) {
                 }),
                 onEachFeature: (feature, layer) => {
                     const props = feature.properties;
-                    
+
                     layer.on('click', () => selectEtap(mahalleAd, props.etap_adi, etapData));
                 }
             }).addTo(etaplarLayer);
@@ -631,11 +631,11 @@ async function selectMahalle(mahalleAd) {
             Object.keys(etapData.binalar).forEach((etapAdi, index) => {
                 const binalar = etapData.binalar[etapAdi];
                 const etapColor = ETAP_COLORS[index % ETAP_COLORS.length];
-                
+
                 binalar.forEach(bina => {
                     if (bina.geometry) {
                         const riskColor = getBuildingColor(bina.properties.risk_kategorisi);
-                        
+
                         const geoLayer = L.geoJSON(bina, {
                             style: {
                                 fillColor: etapColor,      // Başlangıçta etap rengi
@@ -648,21 +648,21 @@ async function selectMahalle(mahalleAd) {
                                 layer.options.etapColor = etapColor;
                                 layer.options.riskColor = riskColor;
                                 layer.options.binaData = { ...bina.properties, etap_adi: etapAdi };
-                                
-                                layer.on('mouseover', function() { 
+
+                                layer.on('mouseover', function () {
                                     if (currentEtap && currentEtap !== etapAdi) return;
-                                    this.setStyle({ weight: 3, fillOpacity: 0.95, color: '#fff' }); 
+                                    this.setStyle({ weight: 3, fillOpacity: 0.95, color: '#fff' });
                                     this.bringToFront();
                                     if (!currentEtap) {
                                         showEtapInfo(etapData.etaplar.find(e => e.etap_adi === etapAdi) || { etap_adi: etapAdi });
                                     }
                                 });
-                                layer.on('mouseout', function() { 
+                                layer.on('mouseout', function () {
                                     if (currentEtap && currentEtap !== etapAdi) return;
                                     const color = currentEtap ? this.options.riskColor : this.options.etapColor;
-                                    this.setStyle({ weight: 1, fillOpacity: currentEtap ? 0.8 : 0.7, color: color }); 
+                                    this.setStyle({ weight: 1, fillOpacity: currentEtap ? 0.8 : 0.7, color: color });
                                 });
-                                layer.on('click', function() {
+                                layer.on('click', function () {
                                     if (!currentEtap) {
                                         // Etap seçilmemişse, etabı seç
                                         selectEtap(mahalleAd, etapAdi, etapData);
@@ -673,13 +673,13 @@ async function selectMahalle(mahalleAd) {
                                 });
                             }
                         });
-                        
+
                         geoLayer.options.etapAdi = etapAdi;
                         geoLayer.addTo(binalarLayer);
                     }
                 });
             });
-            
+
             // Legend'ı göster
             document.getElementById('legend').classList.add('visible');
         } else {
@@ -688,16 +688,16 @@ async function selectMahalle(mahalleAd) {
             const data = await response.json();
 
             L.geoJSON(data, {
-                style: f => ({ 
-                    color: getBuildingColor(f.properties.risk_kategorisi), 
-                    weight: 1.5, 
-                    fillColor: getBuildingColor(f.properties.risk_kategorisi), 
-                    fillOpacity: 0.7 
+                style: f => ({
+                    color: getBuildingColor(f.properties.risk_kategorisi),
+                    weight: 1.5,
+                    fillColor: getBuildingColor(f.properties.risk_kategorisi),
+                    fillOpacity: 0.7
                 }),
                 onEachFeature: (f, layer) => {
                     const p = f.properties;
-                    layer.on('mouseover', function() { this.setStyle({ weight: 3, fillOpacity: 0.95, color: '#fff' }); this.bringToFront(); });
-                    layer.on('mouseout', function() { this.setStyle({ weight: 1.5, fillOpacity: 0.7, color: getBuildingColor(p.risk_kategorisi) }); });
+                    layer.on('mouseover', function () { this.setStyle({ weight: 3, fillOpacity: 0.95, color: '#fff' }); this.bringToFront(); });
+                    layer.on('mouseout', function () { this.setStyle({ weight: 1.5, fillOpacity: 0.7, color: getBuildingColor(p.risk_kategorisi) }); });
                     layer.on('click', () => showBuildingDetails(p));
                 }
             }).addTo(binalarLayer);
@@ -724,10 +724,10 @@ function showEtapInfo(props) {
 // ========== ETAP SEÇİMİNİ SIFIRLA ==========
 function resetEtapSelection() {
     if (!currentEtap) return;
-    
+
     currentEtap = null;
     showMahalleName(currentMahalle);
-    
+
     // Legend'ı etaplara geri çevir
     document.getElementById('legendTitle').textContent = 'Etaplar';
     document.getElementById('legendContent').innerHTML = `
@@ -738,15 +738,15 @@ function resetEtapSelection() {
         <div class="legend-item"><div class="legend-color" style="background:#8b5cf6"></div>Etap 5</div>
         <div class="legend-item"><div class="legend-color" style="background:#06b6d4"></div>Etap 6</div>
     `;
-    
+
     // Binaları normale döndür (etap rengine geri dön)
     binalarLayer.eachLayer(geoLayer => {
         if (geoLayer.eachLayer) {
             geoLayer.eachLayer(layer => {
                 const etapColor = layer.options?.etapColor;
                 if (etapColor) {
-                    layer.setStyle({ 
-                        fillOpacity: 0.7, 
+                    layer.setStyle({
+                        fillOpacity: 0.7,
                         opacity: 1,
                         weight: 1,
                         fillColor: etapColor,
@@ -757,8 +757,8 @@ function resetEtapSelection() {
         } else {
             const etapColor = geoLayer.options?.etapColor;
             if (etapColor) {
-                geoLayer.setStyle({ 
-                    fillOpacity: 0.7, 
+                geoLayer.setStyle({
+                    fillOpacity: 0.7,
                     opacity: 1,
                     weight: 1,
                     fillColor: etapColor,
@@ -767,7 +767,7 @@ function resetEtapSelection() {
             }
         }
     });
-    
+
     hideInfoPanel();
 }
 
@@ -799,11 +799,11 @@ async function selectEtap(mahalleAd, etapAdi, etapData) {
             geoLayer.eachLayer(layer => {
                 const binaEtap = layer.options?.etapAdi;
                 const riskColor = layer.options?.riskColor;
-                
+
                 if (binaEtap === etapAdi && riskColor) {
                     // SEÇİLİ ETABIN BİNALARI - Risk rengine dönüş
-                    layer.setStyle({ 
-                        fillOpacity: 0.85, 
+                    layer.setStyle({
+                        fillOpacity: 0.85,
                         opacity: 1,
                         weight: 1.5,
                         fillColor: riskColor,
@@ -812,8 +812,8 @@ async function selectEtap(mahalleAd, etapAdi, etapData) {
                     layer.bringToFront();
                 } else if (binaEtap) {
                     // DİĞER BİNALAR - Çok soluk
-                    layer.setStyle({ 
-                        fillOpacity: 0.1, 
+                    layer.setStyle({
+                        fillOpacity: 0.1,
                         opacity: 0.2,
                         weight: 0.3
                     });
@@ -823,10 +823,10 @@ async function selectEtap(mahalleAd, etapAdi, etapData) {
             // Tek layer ise
             const binaEtap = geoLayer.options?.etapAdi;
             const riskColor = geoLayer.options?.riskColor;
-            
+
             if (binaEtap === etapAdi && riskColor) {
-                geoLayer.setStyle({ 
-                    fillOpacity: 0.85, 
+                geoLayer.setStyle({
+                    fillOpacity: 0.85,
                     opacity: 1,
                     weight: 1.5,
                     fillColor: riskColor,
@@ -834,8 +834,8 @@ async function selectEtap(mahalleAd, etapAdi, etapData) {
                 });
                 geoLayer.bringToFront();
             } else if (binaEtap) {
-                geoLayer.setStyle({ 
-                    fillOpacity: 0.1, 
+                geoLayer.setStyle({
+                    fillOpacity: 0.1,
                     opacity: 0.2,
                     weight: 0.3
                 });
@@ -855,18 +855,18 @@ function showBuildingDetails(p) {
     const etapInfo = p.etap_adi ? ` | ${p.etap_adi}` : '';
     document.getElementById('buildingType').textContent = `${p.yapi_turu || '-'} - ${p.mahalle_adi || ''}${etapInfo}`;
     const emoji = { 'Düşük': '🟢', 'Orta': '🟡', 'Yüksek': '🔴', 'Çok Yüksek': '⛔' }[p.risk_kategorisi] || '🟢';
-    
+
     const details = [
-        ['ID', p.bina_id], 
-        ['Mahalle', p.mahalle_adi || '-'], 
+        ['ID', p.bina_id],
+        ['Mahalle', p.mahalle_adi || '-'],
         ['Etap', p.etap_adi || '-'],
         ['Risk', `${emoji} ${p.risk_kategorisi}`],
-        ['Puan', p.risk_puani || 0], 
-        ['Yapı', p.yapi_turu || '-'], 
+        ['Puan', p.risk_puani || 0],
+        ['Yapı', p.yapi_turu || '-'],
         ['Kat', p.kat_sayisi || '-'],
         ['Yaş', p.bina_yasi ? `${p.bina_yasi} yıl` : '-']
     ];
-    
+
     document.getElementById('buildingDetails').innerHTML = details
         .map(([l, v]) => `<div class="detail-item"><div class="detail-label">${l}</div><div class="detail-value">${v}</div></div>`)
         .join('');
@@ -909,27 +909,27 @@ function applyFilters() {
     const filterOrta = document.getElementById('filterOrta')?.checked ?? true;
     const filterYuksek = document.getElementById('filterYuksek')?.checked ?? true;
     const filterCokYuksek = document.getElementById('filterCokYuksek')?.checked ?? true;
-    
+
     if (document.getElementById('filterRiskVal')) {
         document.getElementById('filterRiskVal').textContent = minRisk;
     }
 
     // Risk kategorisine göre filtrele
     const filtered = allMahalleler.filter(m => m.ortalama_risk >= minRisk);
-    
+
     // Her mahalle için kategoriye göre bina sayısını hesapla
     let totalDusuk = 0, totalOrta = 0, totalYuksek = 0, totalCokYuksek = 0;
-    
+
     filtered.forEach(m => {
         if (filterDusuk) totalDusuk += m.dusuk_risk || 0;
         if (filterOrta) totalOrta += m.orta_risk || 0;
         if (filterYuksek) totalYuksek += m.yuksek_risk || 0;
         if (filterCokYuksek) totalCokYuksek += m.cok_yuksek_risk || 0;
     });
-    
+
     const totalBina = totalDusuk + totalOrta + totalYuksek + totalCokYuksek;
     const avgRisk = filtered.length ? (filtered.reduce((sum, m) => sum + m.ortalama_risk, 0) / filtered.length).toFixed(1) : 0;
-    
+
     // En riskli mahalleleri listele
     const topRiskli = [...filtered].sort((a, b) => b.ortalama_risk - a.ortalama_risk).slice(0, 3);
 
@@ -989,15 +989,15 @@ async function runEtapScenario() {
     const budgetStr = budgetInput?.value?.replace(/[.,\s]/g, '') || '100000000';
     const butce = parseInt(budgetStr) || 100000000;
     const sure = parseInt(document.getElementById('scenarioTime')?.value || 36);
-    
+
     try {
         const response = await fetch(`/api/kds/senaryo?butce=${butce}&sure=${sure}`);
         const data = await response.json();
-        
+
         document.getElementById('scenarioEtap').textContent = data.sonuc.tamamlanabilecek_etap.toLocaleString('tr-TR');
         document.getElementById('scenarioBina').textContent = data.sonuc.toplam_bina.toLocaleString('tr-TR');
         document.getElementById('scenarioKalan').textContent = formatNumberReadable(data.sonuc.kalan_butce) + ' TL';
-        
+
         // Etap listesi - Hepsi görünsün
         const listEl = document.getElementById('scenarioEtapList');
         if (listEl && data.etaplar.length > 0) {
@@ -1013,7 +1013,7 @@ async function runEtapScenario() {
         } else if (listEl) {
             listEl.innerHTML = '<div style="color:var(--text-muted);">Bütçe yetersiz</div>';
         }
-        
+
     } catch (error) {
         console.error('Senaryo analizi hatası:', error);
     }
@@ -1029,22 +1029,22 @@ function formatNumberReadable(num) {
 function setupBudgetInput() {
     const budgetInput = document.getElementById('scenarioBudget');
     if (!budgetInput) return;
-    
-    budgetInput.addEventListener('input', function(e) {
+
+    budgetInput.addEventListener('input', function (e) {
         // Sadece rakamları al
         let value = e.target.value.replace(/[^\d]/g, '');
-        
+
         // Boş ise çık
         if (!value) {
             e.target.value = '';
             return;
         }
-        
+
         // Sayıyı formatla (1.000.000 gibi)
         const num = parseInt(value);
         e.target.value = num.toLocaleString('tr-TR');
     });
-    
+
     // İlk değeri formatla
     const initialValue = budgetInput.value.replace(/[^\d]/g, '');
     if (initialValue) {
@@ -1055,36 +1055,36 @@ function setupBudgetInput() {
 // ========== KDS: MALİYET-FAYDA (Veritabanı Bazlı) ==========
 function calculateCostFromDB() {
     if (!globalStats || !allMahalleler.length) return;
-    
+
     const totalBina = globalStats.toplam_bina || 31681;
-    
+
     // Risk kategorisine göre maliyet hesaplama
     const dusukRisk = allMahalleler.reduce((sum, m) => sum + (m.dusuk_risk || 0), 0);
     const ortaRisk = allMahalleler.reduce((sum, m) => sum + (m.orta_risk || 0), 0);
     const yuksekRisk = allMahalleler.reduce((sum, m) => sum + (m.yuksek_risk || 0), 0);
     const cokYuksekRisk = allMahalleler.reduce((sum, m) => sum + (m.cok_yuksek_risk || 0), 0);
-    
+
     // Ortalama bina maliyeti (m2 * kat * birim fiyat)
     // Düşük risk: 500K TL, Orta: 1M TL, Yüksek: 2M TL, Çok Yüksek: 3M TL
     const maliyetDusuk = dusukRisk * 500000;
     const maliyetOrta = ortaRisk * 1000000;
     const maliyetYuksek = yuksekRisk * 2000000;
     const maliyetCokYuksek = cokYuksekRisk * 3000000;
-    
+
     const toplamMaliyet = maliyetDusuk + maliyetOrta + maliyetYuksek + maliyetCokYuksek;
-    
+
     // Fayda hesaplama (risk azaltma + değer artışı + sosyal fayda)
     // Yüksek riskli bina dönüşümü daha fazla fayda sağlar
     const faydaCarpani = 1.35; // %35 net fayda
     const toplamFayda = toplamMaliyet * faydaCarpani;
-    
+
     // ROI hesaplama
     const roi = ((toplamFayda - toplamMaliyet) / toplamMaliyet * 100).toFixed(0);
-    
+
     // Geri ödeme süresi (yıl)
     const yillikFayda = toplamFayda / 10; // 10 yılda toplam fayda
     const geriOdeme = Math.ceil(toplamMaliyet / yillikFayda);
-    
+
     // UI güncelle
     if (document.getElementById('costTotal')) {
         document.getElementById('costTotal').textContent = formatMoney(toplamMaliyet);
@@ -1161,7 +1161,7 @@ function compareMahalleler() {
 // ========== KDS: AKILLI ÖNERİLER (Veritabanı Bazlı) ==========
 function generateSmartRecommendations() {
     if (!allMahalleler.length) return;
-    
+
     const list = document.getElementById('recommendationList');
     if (!list) return;
 
@@ -1170,25 +1170,25 @@ function generateSmartRecommendations() {
     const enRiskli = sorted[0];
     const ikinciRiskli = sorted[1];
     const ucuncuRiskli = sorted[2];
-    
+
     // Toplam istatistikler
     const toplamBina = globalStats?.toplam_bina || 31681;
     const toplamYuksekRisk = allMahalleler.reduce((sum, m) => sum + m.yuksek_risk + m.cok_yuksek_risk, 0);
     const yuksekRiskOrani = ((toplamYuksekRisk / toplamBina) * 100).toFixed(1);
-    
+
     // En kalabalık mahalle
     const enKalabalik = [...allMahalleler].sort((a, b) => b.bina_sayisi - a.bina_sayisi)[0];
-    
+
     // En düşük riskli (başlangıç için uygun)
     const enDusukRiskli = sorted[sorted.length - 1];
-    
+
     const recommendations = [
         {
             type: 'urgent',
             icon: '🚨',
             title: `${enRiskli.ad.replace(' Mahallesi', '')} - Acil Müdahale Gerekli`,
             text: `Risk puanı ${enRiskli.ortalama_risk.toFixed(1)} ile en kritik seviyede. ` +
-                  `${(enRiskli.yuksek_risk + enRiskli.cok_yuksek_risk).toLocaleString('tr-TR')} yüksek riskli bina acil dönüşüm programına alınmalı.`
+                `${(enRiskli.yuksek_risk + enRiskli.cok_yuksek_risk).toLocaleString('tr-TR')} yüksek riskli bina acil dönüşüm programına alınmalı.`
         },
         {
             type: 'urgent',
@@ -1201,28 +1201,28 @@ function generateSmartRecommendations() {
             icon: '📊',
             title: `Bayraklı Geneli: %${yuksekRiskOrani} Yüksek Risk`,
             text: `Toplam ${toplamBina.toLocaleString('tr-TR')} binanın ${toplamYuksekRisk.toLocaleString('tr-TR')} tanesi yüksek/çok yüksek risk kategorisinde. ` +
-                  `Sistematik dönüşüm planı şart.`
+                `Sistematik dönüşüm planı şart.`
         },
         {
             type: 'warning',
             icon: '🏘️',
             title: `${enKalabalik.ad.replace(' Mahallesi', '')} - Yoğunluk Dikkat`,
             text: `${enKalabalik.bina_sayisi.toLocaleString('tr-TR')} bina ile en kalabalık mahalle. ` +
-                  `Blok bazlı dönüşüm önerilir. Tahmini etkilenecek kişi: ${(enKalabalik.bina_sayisi * 4).toLocaleString('tr-TR')}`
+                `Blok bazlı dönüşüm önerilir. Tahmini etkilenecek kişi: ${(enKalabalik.bina_sayisi * 4).toLocaleString('tr-TR')}`
         },
         {
             type: '',
             icon: '🎯',
             title: `Pilot Bölge Önerisi: ${enDusukRiskli.ad.replace(' Mahallesi', '')}`,
             text: `Risk puanı ${enDusukRiskli.ortalama_risk.toFixed(1)} ile en düşük seviyede. ` +
-                  `${enDusukRiskli.bina_sayisi} bina - pilot uygulama için ideal başlangıç noktası.`
+                `${enDusukRiskli.bina_sayisi} bina - pilot uygulama için ideal başlangıç noktası.`
         },
         {
             type: '',
             icon: '📅',
             title: 'Optimal Dönüşüm Takvimi',
             text: 'İzmir iklim verileri analizi: Nisan-Ekim arası inşaat için en uygun dönem. ' +
-                  'Kış öncesi temel atılması, yaz aylarında kaba inşaat tamamlanması önerilir.'
+                'Kış öncesi temel atılması, yaz aylarında kaba inşaat tamamlanması önerilir.'
         }
     ];
 
@@ -1259,9 +1259,9 @@ function generateReport(type) {
     if (!preview) return;
 
     const toplamBina = globalStats?.toplam_bina?.toLocaleString('tr-TR') || '-';
-    const toplamYuksek = allMahalleler.reduce((s,m) => s + (m.yuksek_risk||0) + (m.cok_yuksek_risk||0), 0);
-    const sorted = [...allMahalleler].sort((a,b) => b.ortalama_risk - a.ortalama_risk);
-    
+    const toplamYuksek = allMahalleler.reduce((s, m) => s + (m.yuksek_risk || 0) + (m.cok_yuksek_risk || 0), 0);
+    const sorted = [...allMahalleler].sort((a, b) => b.ortalama_risk - a.ortalama_risk);
+
     const reports = {
         ozet: `
             <div style="border-left:3px solid var(--accent-cyan); padding-left:12px;">
@@ -1284,7 +1284,7 @@ function generateReport(type) {
                 <span style="font-size:10px; color:var(--text-muted)">${date} • Tüm mahalleler</span>
             </div>
             <div style="margin-top:10px; font-size:10px; line-height:1.5; max-height:80px; overflow-y:auto;">
-                ${allMahalleler.slice(0,5).map(m => `• ${m.ad.replace(' Mahallesi', '')}: ${m.bina_sayisi} bina`).join('<br>')}
+                ${allMahalleler.slice(0, 5).map(m => `• ${m.ad.replace(' Mahallesi', '')}: ${m.bina_sayisi} bina`).join('<br>')}
                 <br>• ... ve ${allMahalleler.length - 5} mahalle daha
             </div>
             <button class="btn btn-primary" style="margin-top:10px; width:100%" onclick="downloadDetailedReport('mahalle')">
@@ -1298,7 +1298,7 @@ function generateReport(type) {
             </div>
             <div style="margin-top:10px; font-size:10px; line-height:1.5; max-height:80px; overflow-y:auto;">
                 <strong>İlk 5 Öncelikli:</strong><br>
-                ${sorted.slice(0,5).map((m,i) => `${i+1}. ${m.ad.replace(' Mahallesi', '')} - Risk: ${m.ortalama_risk.toFixed(1)}`).join('<br>')}
+                ${sorted.slice(0, 5).map((m, i) => `${i + 1}. ${m.ad.replace(' Mahallesi', '')} - Risk: ${m.ortalama_risk.toFixed(1)}`).join('<br>')}
             </div>
             <button class="btn btn-primary" style="margin-top:10px; width:100%" onclick="downloadDetailedReport('oncelik')">
                 📥 Öncelik Raporu PDF (Etaplar dahil)
@@ -1320,81 +1320,81 @@ function generateReport(type) {
             </button>
         `
     };
-    
+
     preview.innerHTML = reports[type] || '<p style="font-size:11px; color:var(--text-muted); text-align:center;">Rapor türü seçin...</p>';
 }
 
 // Türkçe karakter düzeltme
 function turkishToAscii(text) {
-    const map = {'ç':'c','Ç':'C','ğ':'g','Ğ':'G','ı':'i','İ':'I','ö':'o','Ö':'O','ş':'s','Ş':'S','ü':'u','Ü':'U'};
+    const map = { 'ç': 'c', 'Ç': 'C', 'ğ': 'g', 'Ğ': 'G', 'ı': 'i', 'İ': 'I', 'ö': 'o', 'Ö': 'O', 'ş': 's', 'Ş': 'S', 'ü': 'u', 'Ü': 'U' };
     return text.replace(/[çÇğĞıİöÖşŞüÜ]/g, c => map[c] || c);
 }
 
 async function downloadDetailedReport(type) {
     const { jsPDF } = window.jspdf;
     if (!jsPDF) { alert('PDF kutuphanesi yuklenemedi'); return; }
-    
+
     const doc = new jsPDF();
     const date = new Date().toLocaleDateString('tr-TR');
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-    
+
     // Başlık sayfası
     doc.setFillColor(10, 14, 23);
     doc.rect(0, 0, pageWidth, pageHeight, 'F');
     doc.setTextColor(241, 245, 249);
     doc.setFontSize(28);
-    doc.text('BAYRAKLI KENTSEL DONUSUM', pageWidth/2, 60, { align: 'center' });
+    doc.text('BAYRAKLI KENTSEL DONUSUM', pageWidth / 2, 60, { align: 'center' });
     doc.setFontSize(22);
-    doc.text('KARAR DESTEK SISTEMI', pageWidth/2, 75, { align: 'center' });
-    
+    doc.text('KARAR DESTEK SISTEMI', pageWidth / 2, 75, { align: 'center' });
+
     doc.setFontSize(16);
     doc.setTextColor(6, 182, 212);
     const titles = { ozet: 'OZET RAPOR', mahalle: 'MAHALLE DETAY RAPORU', oncelik: 'ONCELIK RAPORU', maliyet: 'MALIYET ANALIZ RAPORU' };
-    doc.text(titles[type], pageWidth/2, 110, { align: 'center' });
-    
+    doc.text(titles[type], pageWidth / 2, 110, { align: 'center' });
+
     doc.setTextColor(148, 163, 184);
     doc.setFontSize(12);
-    doc.text(`Olusturma Tarihi: ${date}`, pageWidth/2, 140, { align: 'center' });
-    doc.text(`Toplam Mahalle: ${allMahalleler.length}`, pageWidth/2, 152, { align: 'center' });
-    doc.text(`Toplam Bina: ${globalStats?.toplam_bina?.toLocaleString('tr-TR') || '-'}`, pageWidth/2, 164, { align: 'center' });
-    
+    doc.text(`Olusturma Tarihi: ${date}`, pageWidth / 2, 140, { align: 'center' });
+    doc.text(`Toplam Mahalle: ${allMahalleler.length}`, pageWidth / 2, 152, { align: 'center' });
+    doc.text(`Toplam Bina: ${globalStats?.toplam_bina?.toLocaleString('tr-TR') || '-'}`, pageWidth / 2, 164, { align: 'center' });
+
     // Rapor türüne göre içerik
     if (type === 'ozet') await generateOzetReport(doc);
     else if (type === 'mahalle') await generateMahalleReport(doc);
     else if (type === 'oncelik') await generateOncelikReport(doc);
     else if (type === 'maliyet') await generateMaliyetReport(doc);
-    
+
     doc.save(`Bayrakli_KDS_${titles[type].replace(/ /g, '_')}_${Date.now()}.pdf`);
 }
 
 // ÖZET RAPOR
 async function generateOzetReport(doc) {
     const pageWidth = doc.internal.pageSize.getWidth();
-    
+
     // Sayfa 2: Genel İstatistikler
     doc.addPage();
     addPageHeader(doc, 'GENEL ISTATISTIKLER');
-    
+
     let y = 45;
     doc.setFontSize(11);
     doc.setTextColor(241, 245, 249);
-    
+
     const toplamBina = globalStats?.toplam_bina || 0;
-    const dusukRisk = allMahalleler.reduce((s,m) => s + (m.dusuk_risk||0), 0);
-    const ortaRisk = allMahalleler.reduce((s,m) => s + (m.orta_risk||0), 0);
-    const yuksekRisk = allMahalleler.reduce((s,m) => s + (m.yuksek_risk||0), 0);
-    const cokYuksekRisk = allMahalleler.reduce((s,m) => s + (m.cok_yuksek_risk||0), 0);
-    
+    const dusukRisk = allMahalleler.reduce((s, m) => s + (m.dusuk_risk || 0), 0);
+    const ortaRisk = allMahalleler.reduce((s, m) => s + (m.orta_risk || 0), 0);
+    const yuksekRisk = allMahalleler.reduce((s, m) => s + (m.yuksek_risk || 0), 0);
+    const cokYuksekRisk = allMahalleler.reduce((s, m) => s + (m.cok_yuksek_risk || 0), 0);
+
     const stats = [
         ['Toplam Bina Sayisi', toplamBina.toLocaleString('tr-TR')],
         ['Mahalle Sayisi', allMahalleler.length.toString()],
-        ['Dusuk Riskli Bina', `${dusukRisk.toLocaleString('tr-TR')} (%${(dusukRisk/toplamBina*100).toFixed(1)})`],
-        ['Orta Riskli Bina', `${ortaRisk.toLocaleString('tr-TR')} (%${(ortaRisk/toplamBina*100).toFixed(1)})`],
-        ['Yuksek Riskli Bina', `${yuksekRisk.toLocaleString('tr-TR')} (%${(yuksekRisk/toplamBina*100).toFixed(1)})`],
-        ['Cok Yuksek Riskli Bina', `${cokYuksekRisk.toLocaleString('tr-TR')} (%${(cokYuksekRisk/toplamBina*100).toFixed(1)})`]
+        ['Dusuk Riskli Bina', `${dusukRisk.toLocaleString('tr-TR')} (%${(dusukRisk / toplamBina * 100).toFixed(1)})`],
+        ['Orta Riskli Bina', `${ortaRisk.toLocaleString('tr-TR')} (%${(ortaRisk / toplamBina * 100).toFixed(1)})`],
+        ['Yuksek Riskli Bina', `${yuksekRisk.toLocaleString('tr-TR')} (%${(yuksekRisk / toplamBina * 100).toFixed(1)})`],
+        ['Cok Yuksek Riskli Bina', `${cokYuksekRisk.toLocaleString('tr-TR')} (%${(cokYuksekRisk / toplamBina * 100).toFixed(1)})`]
     ];
-    
+
     stats.forEach(([label, value]) => {
         doc.setTextColor(148, 163, 184);
         doc.text(label + ':', 20, y);
@@ -1402,17 +1402,17 @@ async function generateOzetReport(doc) {
         doc.text(value, 100, y);
         y += 10;
     });
-    
+
     // Sayfa 3: Mahalle Özet Tablosu
     doc.addPage();
     addPageHeader(doc, 'MAHALLE OZET TABLOSU');
-    
+
     y = 45;
     doc.setFontSize(9);
-    
+
     // Tablo başlıkları
     doc.setFillColor(26, 34, 53);
-    doc.rect(15, y-5, pageWidth-30, 10, 'F');
+    doc.rect(15, y - 5, pageWidth - 30, 10, 'F');
     doc.setTextColor(6, 182, 212);
     doc.text('Mahalle', 20, y);
     doc.text('Bina', 80, y);
@@ -1420,53 +1420,53 @@ async function generateOzetReport(doc) {
     doc.text('Yuksek', 135, y);
     doc.text('Dusuk', 160, y);
     y += 12;
-    
-    const sorted = [...allMahalleler].sort((a,b) => b.ortalama_risk - a.ortalama_risk);
-    
+
+    const sorted = [...allMahalleler].sort((a, b) => b.ortalama_risk - a.ortalama_risk);
+
     sorted.forEach((m, i) => {
         if (y > 270) { doc.addPage(); addPageHeader(doc, 'MAHALLE OZET TABLOSU (devam)'); y = 45; }
-        
+
         doc.setTextColor(241, 245, 249);
         const name = turkishToAscii(m.ad.replace(' Mahallesi', '')).substring(0, 20);
         doc.text(name, 20, y);
         doc.text(m.bina_sayisi.toString(), 80, y);
-        
+
         // Risk rengine göre
         if (m.ortalama_risk > 60) doc.setTextColor(239, 68, 68);
         else if (m.ortalama_risk > 40) doc.setTextColor(245, 158, 11);
         else doc.setTextColor(34, 197, 94);
         doc.text(m.ortalama_risk.toFixed(1), 105, y);
-        
+
         doc.setTextColor(239, 68, 68);
         doc.text((m.yuksek_risk + m.cok_yuksek_risk).toString(), 135, y);
         doc.setTextColor(34, 197, 94);
         doc.text(m.dusuk_risk.toString(), 160, y);
         y += 8;
     });
-    
+
     // Etap analizi sayfası
     const etapData = await loadEtapDataForReport();
     if (etapData && etapData.etaplar) {
         doc.addPage();
         addPageHeader(doc, 'ETAP ANALIZI OZETI');
         y = 45;
-        
+
         doc.setFontSize(10);
         doc.setTextColor(148, 163, 184);
         doc.text(`Toplam Etap Sayisi: ${etapData.toplam_etap}`, 20, y);
         doc.text(`Acil Etap: ${etapData.ozet.acil_etap_sayisi}`, 100, y);
         doc.text(`Oncelikli: ${etapData.ozet.oncelikli_etap_sayisi}`, 150, y);
         y += 15;
-        
+
         doc.setFontSize(9);
         etapData.etaplar.slice(0, 20).forEach((e, i) => {
             if (y > 270) { doc.addPage(); addPageHeader(doc, 'ETAP ANALIZI (devam)'); y = 45; }
-            
+
             doc.setTextColor(241, 245, 249);
             const etapName = turkishToAscii(e.etap_adi).substring(0, 25);
-            doc.text(`${i+1}. ${etapName}`, 20, y);
+            doc.text(`${i + 1}. ${etapName}`, 20, y);
             doc.text(`${e.bina_sayisi} bina`, 100, y);
-            
+
             if (e.oneri === 'Acil') doc.setTextColor(239, 68, 68);
             else if (e.oneri === 'Oncelikli') doc.setTextColor(245, 158, 11);
             else doc.setTextColor(34, 197, 94);
@@ -1479,28 +1479,28 @@ async function generateOzetReport(doc) {
 
 // MAHALLE DETAY RAPORU
 async function generateMahalleReport(doc) {
-    const sorted = [...allMahalleler].sort((a,b) => b.ortalama_risk - a.ortalama_risk);
-    
+    const sorted = [...allMahalleler].sort((a, b) => b.ortalama_risk - a.ortalama_risk);
+
     for (let i = 0; i < sorted.length; i++) {
         const m = sorted[i];
         doc.addPage();
         addPageHeader(doc, turkishToAscii(m.ad.toUpperCase()));
-        
+
         let y = 50;
         doc.setFontSize(11);
-        
+
         // Sol kolon
         doc.setTextColor(148, 163, 184);
         doc.text('Genel Bilgiler', 20, y);
         y += 10;
         doc.setFontSize(10);
-        
+
         const info = [
             ['Toplam Bina', m.bina_sayisi.toLocaleString('tr-TR')],
             ['Ortalama Risk Puani', m.ortalama_risk.toFixed(2)],
-            ['Risk Siralaması', `${i+1}/${sorted.length}`]
+            ['Risk Siralaması', `${i + 1}/${sorted.length}`]
         ];
-        
+
         info.forEach(([label, value]) => {
             doc.setTextColor(148, 163, 184);
             doc.text(label + ':', 25, y);
@@ -1508,7 +1508,7 @@ async function generateMahalleReport(doc) {
             doc.text(value, 80, y);
             y += 8;
         });
-        
+
         // Risk dağılımı
         y += 10;
         doc.setFontSize(11);
@@ -1516,65 +1516,65 @@ async function generateMahalleReport(doc) {
         doc.text('Risk Dagilimi', 20, y);
         y += 10;
         doc.setFontSize(10);
-        
+
         const risks = [
             ['Dusuk Risk', m.dusuk_risk, '#22c55e'],
             ['Orta Risk', m.orta_risk, '#eab308'],
             ['Yuksek Risk', m.yuksek_risk, '#ef4444'],
             ['Cok Yuksek Risk', m.cok_yuksek_risk, '#991b1b']
         ];
-        
+
         risks.forEach(([label, value, color]) => {
             const pct = ((value / m.bina_sayisi) * 100).toFixed(1);
             doc.setTextColor(148, 163, 184);
             doc.text(label + ':', 25, y);
             doc.setTextColor(241, 245, 249);
             doc.text(`${value} (%${pct})`, 80, y);
-            
+
             // Mini bar
             const barWidth = (value / m.bina_sayisi) * 80;
             const rgb = hexToRgb(color);
             doc.setFillColor(rgb.r, rgb.g, rgb.b);
-            doc.rect(120, y-3, barWidth, 4, 'F');
+            doc.rect(120, y - 3, barWidth, 4, 'F');
             y += 8;
         });
-        
+
         // Öneri
         y += 15;
         doc.setFillColor(26, 34, 53);
-        doc.rect(15, y-5, 180, 30, 'F');
+        doc.rect(15, y - 5, 180, 30, 'F');
         doc.setFontSize(10);
         doc.setTextColor(6, 182, 212);
-        doc.text('ONERI:', 20, y+5);
+        doc.text('ONERI:', 20, y + 5);
         doc.setTextColor(241, 245, 249);
         doc.setFontSize(9);
-        
+
         let oneri = '';
         if (m.ortalama_risk > 60) oneri = 'ACIL MUDAHALE GEREKLI - Birinci oncelikli donusum alani olarak belirlenmeli.';
         else if (m.ortalama_risk > 45) oneri = 'ONCELIKLI - Ikinci asama donusum programina dahil edilmeli.';
         else if (m.ortalama_risk > 35) oneri = 'NORMAL ONCELIK - Orta vadeli donusum planina alinmali.';
         else oneri = 'DUSUK ONCELIK - Uzun vadeli plana dahil edilebilir veya pilot bolge olarak kullanilabilir.';
-        
-        doc.text(oneri, 20, y+15, { maxWidth: 170 });
+
+        doc.text(oneri, 20, y + 15, { maxWidth: 170 });
     }
 }
 
 // ÖNCELİK RAPORU
 async function generateOncelikReport(doc) {
     const pageWidth = doc.internal.pageSize.getWidth();
-    
+
     // Mahalle öncelik sıralaması
     doc.addPage();
     addPageHeader(doc, 'MAHALLE ONCELIK SIRALAMASI');
-    
+
     let y = 45;
-    const sorted = [...allMahalleler].sort((a,b) => b.ortalama_risk - a.ortalama_risk);
-    
+    const sorted = [...allMahalleler].sort((a, b) => b.ortalama_risk - a.ortalama_risk);
+
     doc.setFontSize(9);
-    
+
     // Tablo başlığı
     doc.setFillColor(26, 34, 53);
-    doc.rect(15, y-5, pageWidth-30, 10, 'F');
+    doc.rect(15, y - 5, pageWidth - 30, 10, 'F');
     doc.setTextColor(6, 182, 212);
     doc.text('Sira', 20, y);
     doc.text('Mahalle', 35, y);
@@ -1582,16 +1582,16 @@ async function generateOncelikReport(doc) {
     doc.text('Yuksek R.', 125, y);
     doc.text('Durum', 160, y);
     y += 12;
-    
+
     sorted.forEach((m, i) => {
         if (y > 270) { doc.addPage(); addPageHeader(doc, 'MAHALLE ONCELIK SIRALAMASI (devam)'); y = 45; }
-        
+
         doc.setTextColor(241, 245, 249);
-        doc.text(`${i+1}`, 20, y);
+        doc.text(`${i + 1}`, 20, y);
         doc.text(turkishToAscii(m.ad.replace(' Mahallesi', '')).substring(0, 20), 35, y);
         doc.text(m.ortalama_risk.toFixed(1), 100, y);
         doc.text((m.yuksek_risk + m.cok_yuksek_risk).toString(), 125, y);
-        
+
         let durum = 'Normal';
         if (m.ortalama_risk > 60) { durum = 'ACIL'; doc.setTextColor(239, 68, 68); }
         else if (m.ortalama_risk > 45) { durum = 'Oncelikli'; doc.setTextColor(245, 158, 11); }
@@ -1600,16 +1600,16 @@ async function generateOncelikReport(doc) {
         doc.text(durum, 160, y);
         y += 8;
     });
-    
+
     // Etap öncelik sıralaması
     const etapData = await loadEtapDataForReport();
     if (etapData && etapData.etaplar) {
         doc.addPage();
         addPageHeader(doc, 'ETAP ONCELIK SIRALAMASI');
         y = 45;
-        
+
         doc.setFillColor(26, 34, 53);
-        doc.rect(15, y-5, pageWidth-30, 10, 'F');
+        doc.rect(15, y - 5, pageWidth - 30, 10, 'F');
         doc.setTextColor(6, 182, 212);
         doc.text('Sira', 20, y);
         doc.text('Etap', 35, y);
@@ -1618,17 +1618,17 @@ async function generateOncelikReport(doc) {
         doc.text('Skor', 155, y);
         doc.text('Durum', 175, y);
         y += 12;
-        
+
         etapData.etaplar.forEach((e, i) => {
             if (y > 270) { doc.addPage(); addPageHeader(doc, 'ETAP ONCELIK SIRALAMASI (devam)'); y = 45; }
-            
+
             doc.setTextColor(241, 245, 249);
-            doc.text(`${i+1}`, 20, y);
+            doc.text(`${i + 1}`, 20, y);
             doc.text(turkishToAscii(e.etap_adi).substring(0, 18), 35, y);
             doc.text(turkishToAscii(e.mahalle_adi.replace(' Mahallesi', '')).substring(0, 12), 90, y);
             doc.text(e.bina_sayisi.toString(), 135, y);
             doc.text(e.oncelik_skoru.toString(), 155, y);
-            
+
             if (e.oneri === 'Acil') doc.setTextColor(239, 68, 68);
             else if (e.oneri === 'Oncelikli') doc.setTextColor(245, 158, 11);
             else doc.setTextColor(34, 197, 94);
@@ -1641,31 +1641,31 @@ async function generateOncelikReport(doc) {
 // MALİYET RAPORU
 async function generateMaliyetReport(doc) {
     const pageWidth = doc.internal.pageSize.getWidth();
-    
+
     doc.addPage();
     addPageHeader(doc, 'MALIYET ANALIZI');
-    
+
     let y = 50;
-    
+
     // Genel maliyet
     const totalBina = globalStats?.toplam_bina || 31681;
-    const dusukRisk = allMahalleler.reduce((s,m) => s + (m.dusuk_risk||0), 0);
-    const ortaRisk = allMahalleler.reduce((s,m) => s + (m.orta_risk||0), 0);
-    const yuksekRisk = allMahalleler.reduce((s,m) => s + (m.yuksek_risk||0), 0);
-    const cokYuksekRisk = allMahalleler.reduce((s,m) => s + (m.cok_yuksek_risk||0), 0);
-    
+    const dusukRisk = allMahalleler.reduce((s, m) => s + (m.dusuk_risk || 0), 0);
+    const ortaRisk = allMahalleler.reduce((s, m) => s + (m.orta_risk || 0), 0);
+    const yuksekRisk = allMahalleler.reduce((s, m) => s + (m.yuksek_risk || 0), 0);
+    const cokYuksekRisk = allMahalleler.reduce((s, m) => s + (m.cok_yuksek_risk || 0), 0);
+
     const maliyetDusuk = dusukRisk * 500000;
     const maliyetOrta = ortaRisk * 1000000;
     const maliyetYuksek = yuksekRisk * 2000000;
     const maliyetCokYuksek = cokYuksekRisk * 3000000;
     const toplamMaliyet = maliyetDusuk + maliyetOrta + maliyetYuksek + maliyetCokYuksek;
     const toplamFayda = toplamMaliyet * 1.35;
-    
+
     doc.setFontSize(12);
     doc.setTextColor(148, 163, 184);
     doc.text('Genel Maliyet Ozeti', 20, y);
     y += 15;
-    
+
     doc.setFontSize(10);
     const costs = [
         ['Dusuk Riskli Binalar', dusukRisk, 500000, maliyetDusuk],
@@ -1673,71 +1673,71 @@ async function generateMaliyetReport(doc) {
         ['Yuksek Riskli Binalar', yuksekRisk, 2000000, maliyetYuksek],
         ['Cok Yuksek Riskli Binalar', cokYuksekRisk, 3000000, maliyetCokYuksek]
     ];
-    
+
     costs.forEach(([label, count, unit, total]) => {
         doc.setTextColor(148, 163, 184);
         doc.text(label, 25, y);
         doc.setTextColor(241, 245, 249);
-        doc.text(`${count.toLocaleString('tr-TR')} x ${(unit/1000000).toFixed(1)}M TL = `, 100, y);
+        doc.text(`${count.toLocaleString('tr-TR')} x ${(unit / 1000000).toFixed(1)}M TL = `, 100, y);
         doc.setTextColor(6, 182, 212);
         doc.text(formatMoneyPDF(total), 160, y);
         y += 10;
     });
-    
+
     y += 10;
     doc.setDrawColor(45, 58, 79);
     doc.line(20, y, 190, y);
     y += 10;
-    
+
     doc.setFontSize(11);
     doc.setTextColor(148, 163, 184);
     doc.text('TOPLAM TAHMINI MALIYET:', 25, y);
     doc.setTextColor(239, 68, 68);
     doc.text(formatMoneyPDF(toplamMaliyet), 120, y);
     y += 12;
-    
+
     doc.setTextColor(148, 163, 184);
     doc.text('BEKLENEN FAYDA (%35 ROI):', 25, y);
     doc.setTextColor(34, 197, 94);
     doc.text(formatMoneyPDF(toplamFayda), 120, y);
     y += 12;
-    
+
     doc.setTextColor(148, 163, 184);
     doc.text('NET KAZANC:', 25, y);
     doc.setTextColor(6, 182, 212);
     doc.text(formatMoneyPDF(toplamFayda - toplamMaliyet), 120, y);
-    
+
     // Mahalle bazlı maliyet
     doc.addPage();
     addPageHeader(doc, 'MAHALLE BAZLI MALIYET DOKUMU');
     y = 45;
-    
+
     doc.setFontSize(9);
     doc.setFillColor(26, 34, 53);
-    doc.rect(15, y-5, pageWidth-30, 10, 'F');
+    doc.rect(15, y - 5, pageWidth - 30, 10, 'F');
     doc.setTextColor(6, 182, 212);
     doc.text('Mahalle', 20, y);
     doc.text('Bina', 80, y);
     doc.text('Tahmini Maliyet', 110, y);
     doc.text('Oncelik', 165, y);
     y += 12;
-    
-    const sorted = [...allMahalleler].sort((a,b) => b.ortalama_risk - a.ortalama_risk);
-    
+
+    const sorted = [...allMahalleler].sort((a, b) => b.ortalama_risk - a.ortalama_risk);
+
     sorted.forEach((m, i) => {
         if (y > 270) { doc.addPage(); addPageHeader(doc, 'MAHALLE BAZLI MALIYET (devam)'); y = 45; }
-        
-        const maliyet = (m.dusuk_risk * 500000) + (m.orta_risk * 1000000) + 
-                        (m.yuksek_risk * 2000000) + (m.cok_yuksek_risk * 3000000);
-        
+
+        const maliyet = (m.dusuk_risk * 500000) + (m.orta_risk * 1000000) +
+            (m.yuksek_risk * 2000000) + (m.cok_yuksek_risk * 3000000);
+
         doc.setTextColor(241, 245, 249);
         doc.text(turkishToAscii(m.ad.replace(' Mahallesi', '')).substring(0, 20), 20, y);
         doc.text(m.bina_sayisi.toString(), 80, y);
         doc.setTextColor(6, 182, 212);
         doc.text(formatMoneyPDF(maliyet), 110, y);
-        
+
         doc.setTextColor(241, 245, 249);
-        doc.text(`${i+1}`, 170, y);
+        doc.text(`${i + 1}`, 170, y);
         y += 8;
     });
 }
@@ -1776,7 +1776,7 @@ function setupSliders() {
             document.getElementById('filterRiskVal').textContent = val;
         }
     });
-    
+
     // Checkbox'lar için event listener
     ['filterDusuk', 'filterOrta', 'filterYuksek', 'filterCokYuksek'].forEach(id => {
         document.getElementById(id)?.addEventListener('change', applyFilters);
@@ -1790,9 +1790,9 @@ async function loadUrgentBuildings() {
         const response = await fetch('/api/urgent-buildings');
         const data = await response.json();
         const listContainer = document.getElementById('urgentBuildingsList');
-        
+
         if (!listContainer) return;
-        
+
         if (!data.buildings || data.buildings.length === 0) {
             listContainer.innerHTML = `
                 <div class="urgent-empty-state">
@@ -1802,13 +1802,13 @@ async function loadUrgentBuildings() {
             `;
             return;
         }
-        
+
         listContainer.innerHTML = data.buildings.map((building, index) => {
             const isCritical = building.risk_puani >= 90;
             const badgeClass = isCritical ? 'urgent-badge-critical animate-pulse' : 'urgent-badge-high';
             const riskText = isCritical ? 'KRİTİK' : 'YÜKSEK';
             const rank = index + 1;
-            
+
             return `
                 <div class="urgent-card-item" data-bina-id="${building.bina_id}" data-rank="${rank}" style="cursor: pointer;">
                     <div class="urgent-item-left">
@@ -1844,10 +1844,10 @@ async function loadUrgentBuildings() {
                 </div>
             `;
         }).join('');
-        
+
         // Click event listener'ları ekle
         listContainer.querySelectorAll('.urgent-card-item').forEach(item => {
-            item.addEventListener('click', async function() {
+            item.addEventListener('click', async function () {
                 const binaId = parseInt(this.dataset.binaId);
                 const rank = parseInt(this.dataset.rank);
                 await highlightUrgentBuilding(binaId, rank);
@@ -1876,21 +1876,21 @@ async function highlightUrgentBuilding(binaId, rank) {
             throw new Error('Bina bulunamadı');
         }
         const binaData = await response.json();
-        
+
         // Eğer mahalle seçili değilse, binanın mahallesini seç
         if (!currentMahalle || currentMahalle !== binaData.mahalle_adi) {
             await selectMahalle(binaData.mahalle_adi);
             // Mahalle yüklendikten sonra binayı bulmak için kısa bir bekleme
             await new Promise(resolve => setTimeout(resolve, 800));
         }
-        
+
         // Haritada binayı bul ve highlight et
         let foundLayer = null;
         binalarLayer.eachLayer(geoLayer => {
             if (geoLayer.eachLayer) {
                 geoLayer.eachLayer(layer => {
-                    const layerBinaId = layer.options?.binaData?.bina_id || 
-                                      layer.feature?.properties?.bina_id;
+                    const layerBinaId = layer.options?.binaData?.bina_id ||
+                        layer.feature?.properties?.bina_id;
                     if (layerBinaId === binaId) {
                         foundLayer = layer;
                     }
@@ -1902,7 +1902,7 @@ async function highlightUrgentBuilding(binaId, rank) {
                 }
             }
         });
-        
+
         if (foundLayer) {
             // Binayı highlight et
             foundLayer.setStyle({
@@ -1912,13 +1912,13 @@ async function highlightUrgentBuilding(binaId, rank) {
                 fillColor: '#ff0000'
             });
             foundLayer.bringToFront();
-            
+
             // Binanın merkezine zoom yap
             const bounds = foundLayer.getBounds();
             if (bounds.isValid()) {
                 map.fitBounds(bounds, { padding: [100, 100], maxZoom: 18 });
             }
-            
+
             // Bilgi kartını göster
             const binaInfo = {
                 ...binaData,
@@ -1930,10 +1930,10 @@ async function highlightUrgentBuilding(binaId, rank) {
             const mahalleResponse = await fetch(`/api/mahalle/${encodeURIComponent(binaData.mahalle_adi)}/binalar`);
             if (mahalleResponse.ok) {
                 const mahalleBinalar = await mahalleResponse.json();
-                const binaFeature = mahalleBinalar.features?.find(f => 
+                const binaFeature = mahalleBinalar.features?.find(f =>
                     f.properties?.bina_id === binaId
                 );
-                
+
                 if (binaFeature) {
                     const layer = L.geoJSON(binaFeature, {
                         style: {
@@ -1943,12 +1943,12 @@ async function highlightUrgentBuilding(binaId, rank) {
                             fillColor: '#ff0000'
                         }
                     }).addTo(binalarLayer);
-                    
+
                     const bounds = layer.getBounds();
                     if (bounds.isValid()) {
                         map.fitBounds(bounds, { padding: [100, 100], maxZoom: 18 });
                     }
-                    
+
                     const binaInfo = {
                         ...binaData,
                         urgentRank: rank
@@ -1971,25 +1971,25 @@ function showUrgentBuildingInfo(binaData) {
     const etapInfo = binaData.etap_adi ? ` | ${binaData.etap_adi}` : '';
     document.getElementById('buildingType').textContent = `${binaData.yapi_turu || '-'} - ${binaData.mahalle_adi || ''}${etapInfo}`;
     const emoji = { 'Düşük': '🟢', 'Orta': '🟡', 'Yüksek': '🔴', 'Çok Yüksek': '⛔' }[binaData.risk_kategorisi] || '🟢';
-    
+
     // Acil müdahale sırası bilgisini ekle
-    const urgentInfo = binaData.urgentRank ? 
+    const urgentInfo = binaData.urgentRank ?
         `<div class="detail-item" style="background: rgba(220, 38, 38, 0.1); border-left: 3px solid #dc2626;">
             <div class="detail-label" style="color: #dc2626; font-weight: 700;">🚨 Acil Müdahale</div>
             <div class="detail-value" style="color: #dc2626; font-weight: 700;">Bu bina acil müdahale listesinde ${binaData.urgentRank}. sırada</div>
         </div>` : '';
-    
+
     const details = [
-        ['ID', binaData.bina_id], 
-        ['Mahalle', binaData.mahalle_adi || '-'], 
+        ['ID', binaData.bina_id],
+        ['Mahalle', binaData.mahalle_adi || '-'],
         ['Etap', binaData.etap_adi || '-'],
         ['Risk', `${emoji} ${binaData.risk_kategorisi}`],
-        ['Puan', binaData.risk_puani || 0], 
-        ['Yapı', binaData.yapi_turu || '-'], 
+        ['Puan', binaData.risk_puani || 0],
+        ['Yapı', binaData.yapi_turu || '-'],
         ['Kat', binaData.kat_sayisi || '-'],
         ['Yaş', binaData.bina_yasi ? `${binaData.bina_yasi} yıl` : '-']
     ];
-    
+
     document.getElementById('buildingDetails').innerHTML = urgentInfo + details
         .map(([l, v]) => `<div class="detail-item"><div class="detail-label">${l}</div><div class="detail-value">${v}</div></div>`)
         .join('');
@@ -2009,14 +2009,14 @@ async function loadFinancialSummary(mahalle = null, etap = null) {
         if (selectedEtap) {
             params.append('etap_adi', selectedEtap);
         }
-        
+
         const url = `/api/financial-summary${params.toString() ? '?' + params.toString() : ''}`;
         const response = await fetch(url);
         const data = await response.json();
         const contentContainer = document.getElementById('financialSummaryContent');
-        
+
         if (!contentContainer) return;
-        
+
         // Para formatı fonksiyonu
         const formatMoney = (value) => {
             if (value >= 1e12) return (value / 1e12).toFixed(2) + ' Trilyon TL';
@@ -2024,11 +2024,11 @@ async function loadFinancialSummary(mahalle = null, etap = null) {
             if (value >= 1e6) return (value / 1e6).toFixed(1) + ' Milyon TL';
             return value.toLocaleString('tr-TR') + ' TL';
         };
-        
+
         const toplamYatirim = parseFloat(data.toplam_yatirim || 0);
         const ortalamaMaliyet = parseFloat(data.ortalama_maliyet || 0);
         const toplamBina = parseInt(data.toplam_bina || 0);
-        
+
         // Bağlam bilgisi (hangi seviyede gösteriliyor)
         let contextText = 'Tüm ilçe için';
         if (currentEtap && currentMahalle) {
@@ -2036,7 +2036,7 @@ async function loadFinancialSummary(mahalle = null, etap = null) {
         } else if (currentMahalle) {
             contextText = `${currentMahalle} mahallesi için`;
         }
-        
+
         if (toplamBina === 0) {
             contentContainer.innerHTML = `
                 <div class="urgent-empty-state">
@@ -2046,7 +2046,7 @@ async function loadFinancialSummary(mahalle = null, etap = null) {
             `;
             return;
         }
-        
+
         contentContainer.innerHTML = `
             <div class="financial-stat-row">
                 <div class="financial-stat">
@@ -2084,7 +2084,7 @@ async function loadFinancialSummary(mahalle = null, etap = null) {
 async function loadModelDecision(mahalle = null, etap = null) {
     try {
         console.log('Strateji karar verisi yükleniyor...');
-        
+
         // Query parametrelerini hazırla
         const params = new URLSearchParams();
         const selectedMahalle = mahalle || currentMahalle;
@@ -2095,24 +2095,24 @@ async function loadModelDecision(mahalle = null, etap = null) {
         if (selectedEtap) {
             params.append('etap_adi', selectedEtap);
         }
-        
+
         const url = `/api/strategy-decision${params.toString() ? '?' + params.toString() : ''}`;
         const response = await fetch(url);
-        
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
         console.log('Model karar verisi:', data);
-        
+
         const contentContainer = document.getElementById('modelDecisionContent');
-        
+
         if (!contentContainer) {
             console.error('modelDecisionContent elementi bulunamadı!');
             return;
         }
-        
+
         if (!data || !data.talep_dagilimi) {
             console.warn('Strateji karar verisi bulunamadı:', data);
             contentContainer.innerHTML = `
@@ -2123,21 +2123,21 @@ async function loadModelDecision(mahalle = null, etap = null) {
             `;
             return;
         }
-        
+
         const yerindeYuzde = data.talep_dagilimi.yerinde.yuzde || 0;
         const rezervYuzde = data.talep_dagilimi.rezerv.yuzde || 0;
         const nakitYuzde = data.talep_dagilimi.nakit.yuzde || 0;
         const sistemOnerisi = data.sistem_onerisi || 'Belirlenemedi';
         const gerekce = data.gerekce || '';
         const renk = data.renk || '#06b6d4';
-        
+
         // Chart container HTML'i
         const chartHtml = `
             <div class="model-chart-container">
                 <canvas id="modelDecisionChart"></canvas>
             </div>
         `;
-        
+
         // Decision box HTML'i
         const decisionHtml = `
             <div class="model-decision-box">
@@ -2148,40 +2148,40 @@ async function loadModelDecision(mahalle = null, etap = null) {
                 </div>
             </div>
         `;
-        
+
         contentContainer.innerHTML = chartHtml + decisionHtml;
-        
+
         // Chart.js ile Pie Chart oluştur - kısa bir gecikme ile canvas'ın render edilmesini bekle
         setTimeout(() => {
             if (typeof Chart === 'undefined') {
                 console.error('Chart.js yüklenmemiş!');
                 return;
             }
-            
+
             const ctx = document.getElementById('modelDecisionChart');
             if (!ctx) {
                 console.error('modelDecisionChart canvas elementi bulunamadı!');
                 return;
             }
-            
+
             console.log('Chart oluşturuluyor - Yerinde:', yerindeYuzde, 'Rezerv:', rezervYuzde, 'Nakit:', nakitYuzde);
-            
+
             // Eğer önceki chart varsa destroy et
             if (charts.modelDecision) {
                 charts.modelDecision.destroy();
             }
-            
+
             // Eğer veri yoksa, varsayılan değerler göster
             const yerindeData = yerindeYuzde > 0 ? yerindeYuzde : 0;
             const rezervData = rezervYuzde > 0 ? rezervYuzde : 0;
             const nakitData = nakitYuzde > 0 ? nakitYuzde : 0;
-            
+
             // Eğer hiç veri yoksa, eşit dağıt
             const totalData = yerindeData + rezervData + nakitData;
             const finalYerinde = totalData > 0 ? yerindeData : 33.3;
             const finalRezerv = totalData > 0 ? rezervData : 33.3;
             const finalNakit = totalData > 0 ? nakitData : 33.4;
-            
+
             charts.modelDecision = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
@@ -2214,7 +2214,7 @@ async function loadModelDecision(mahalle = null, etap = null) {
                         },
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
+                                label: function (context) {
                                     return context.label + ': %' + context.parsed.toFixed(1);
                                 }
                             }
@@ -2224,17 +2224,17 @@ async function loadModelDecision(mahalle = null, etap = null) {
                 },
                 plugins: [{
                     id: 'centerText',
-                    beforeDraw: function(chart) {
+                    beforeDraw: function (chart) {
                         const ctx = chart.ctx;
                         const centerX = chart.chartArea.left + (chart.chartArea.right - chart.chartArea.left) / 2;
                         const centerY = chart.chartArea.top + (chart.chartArea.bottom - chart.chartArea.top) / 2;
-                        
+
                         ctx.save();
                         ctx.font = 'bold 16px Inter';
                         ctx.fillStyle = '#f1f5f9';
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'middle';
-                        
+
                         const total = finalYerinde + finalRezerv + finalNakit;
                         if (total > 0) {
                             ctx.fillText('%' + total.toFixed(1), centerX, centerY - 8);
@@ -2242,12 +2242,12 @@ async function loadModelDecision(mahalle = null, etap = null) {
                             ctx.fillStyle = '#64748b';
                             ctx.fillText('Toplam Talep', centerX, centerY + 8);
                         }
-                        
+
                         ctx.restore();
                     }
                 }]
             });
-            
+
             console.log('Chart başarıyla oluşturuldu');
         }, 100);
     } catch (error) {
@@ -2268,7 +2268,7 @@ async function loadModelDecision(mahalle = null, etap = null) {
 async function loadLegalRisk(mahalle = null, etap = null) {
     try {
         console.log('Hukuki risk verisi yükleniyor...');
-        
+
         // Query parametrelerini hazırla
         const params = new URLSearchParams();
         const selectedMahalle = mahalle || currentMahalle;
@@ -2279,24 +2279,24 @@ async function loadLegalRisk(mahalle = null, etap = null) {
         if (selectedEtap) {
             params.append('etap_adi', selectedEtap);
         }
-        
+
         const url = `/api/legal-risk${params.toString() ? '?' + params.toString() : ''}`;
         const response = await fetch(url);
-        
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
         console.log('Hukuki risk verisi:', data);
-        
+
         const contentContainer = document.getElementById('legalRiskContent');
-        
+
         if (!contentContainer) {
             console.error('legalRiskContent elementi bulunamadı!');
             return;
         }
-        
+
         if (!data || data.total_buildings === undefined) {
             console.warn('Hukuki risk verisi bulunamadı:', data);
             contentContainer.innerHTML = `
@@ -2307,21 +2307,21 @@ async function loadLegalRisk(mahalle = null, etap = null) {
             `;
             return;
         }
-        
+
         const riskScore = data.risk_score || 0;
         const davaliCount = data.davali_count || 0;
         const riskliMulkiyet = data.riskli_mulkiyet || 0;
         const avgHissedar = data.avg_hissedar || 0;
         const riskMesaji = data.risk_mesaji || '';
         const riskRenk = data.risk_renk || '#06b6d4';
-        
+
         // Gauge chart HTML'i
         const gaugeHtml = `
             <div class="legal-gauge-container">
                 <canvas id="legalRiskGauge"></canvas>
             </div>
         `;
-        
+
         // Stats box HTML'i
         const statsHtml = `
             <div class="legal-stats-box">
@@ -2348,36 +2348,36 @@ async function loadLegalRisk(mahalle = null, etap = null) {
                 </div>
             </div>
         `;
-        
+
         // Footer HTML'i
         const footerHtml = `
             <div class="legal-risk-footer">
                 <div class="legal-risk-message" style="color: ${riskRenk};">${riskMesaji}</div>
             </div>
         `;
-        
+
         contentContainer.innerHTML = gaugeHtml + statsHtml + footerHtml;
-        
+
         // Chart.js ile Gauge Chart oluştur (Doughnut chart kullanarak)
         setTimeout(() => {
             if (typeof Chart === 'undefined') {
                 console.error('Chart.js yüklenmemiş!');
                 return;
             }
-            
+
             const ctx = document.getElementById('legalRiskGauge');
             if (!ctx) {
                 console.error('legalRiskGauge canvas elementi bulunamadı!');
                 return;
             }
-            
+
             console.log('Gauge chart oluşturuluyor - Risk Score:', riskScore);
-            
+
             // Eğer önceki chart varsa destroy et
             if (charts.legalRisk) {
                 charts.legalRisk.destroy();
             }
-            
+
             // Gauge için renk belirleme
             let gaugeColor = '#10b981'; // Yeşil
             if (riskScore >= 70) {
@@ -2385,12 +2385,12 @@ async function loadLegalRisk(mahalle = null, etap = null) {
             } else if (riskScore >= 40) {
                 gaugeColor = '#f59e0b'; // Sarı
             }
-            
+
             // Gauge chart (doughnut chart ile simüle edilmiş)
             // Risk skorunu daha görünür yapmak için minimum %10 göster
             const displayScore = Math.max(riskScore, 10);
             const remaining = 100 - displayScore;
-            
+
             charts.legalRisk = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
@@ -2415,7 +2415,7 @@ async function loadLegalRisk(mahalle = null, etap = null) {
                         tooltip: {
                             enabled: true,
                             callbacks: {
-                                label: function(context) {
+                                label: function (context) {
                                     if (context.label === 'Risk Skoru') {
                                         return `Risk Skoru: ${riskScore.toFixed(1)}/100`;
                                     }
@@ -2427,27 +2427,27 @@ async function loadLegalRisk(mahalle = null, etap = null) {
                 },
                 plugins: [{
                     id: 'centerText',
-                    beforeDraw: function(chart) {
+                    beforeDraw: function (chart) {
                         const ctx = chart.ctx;
                         const centerX = chart.chartArea.left + (chart.chartArea.right - chart.chartArea.left) / 2;
                         const centerY = chart.chartArea.top + (chart.chartArea.bottom - chart.chartArea.top) / 2;
-                        
+
                         ctx.save();
                         ctx.font = 'bold 32px Inter';
                         ctx.fillStyle = gaugeColor;
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'middle';
                         ctx.fillText(riskScore.toFixed(2) + '%', centerX, centerY - 10);
-                        
+
                         ctx.font = '12px Inter';
                         ctx.fillStyle = '#64748b';
                         ctx.fillText('Risk Skoru', centerX, centerY + 15);
-                        
+
                         ctx.restore();
                     }
                 }]
             });
-            
+
             console.log('Gauge chart başarıyla oluşturuldu');
         }, 100);
     } catch (error) {
@@ -2468,7 +2468,7 @@ async function loadLegalRisk(mahalle = null, etap = null) {
 async function loadConstructionSchedule(mahalle = null, etap = null) {
     try {
         console.log('İnşaat takvimi verisi yükleniyor...');
-        
+
         // Query parametrelerini hazırla
         const params = new URLSearchParams();
         const selectedMahalle = mahalle || currentMahalle;
@@ -2479,24 +2479,24 @@ async function loadConstructionSchedule(mahalle = null, etap = null) {
         if (selectedEtap) {
             params.append('etap_adi', selectedEtap);
         }
-        
+
         const url = `/api/construction-schedule${params.toString() ? '?' + params.toString() : ''}`;
         const response = await fetch(url);
-        
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
         console.log('İnşaat takvimi verisi:', data);
-        
+
         const contentContainer = document.getElementById('constructionScheduleContent');
-        
+
         if (!contentContainer) {
             console.error('constructionScheduleContent elementi bulunamadı!');
             return;
         }
-        
+
         if (!data || !data.recommended_start_date) {
             console.warn('İnşaat takvimi verisi bulunamadı:', data);
             contentContainer.innerHTML = `
@@ -2507,15 +2507,15 @@ async function loadConstructionSchedule(mahalle = null, etap = null) {
             `;
             return;
         }
-        
+
         // Tarih formatlama
         const formatDate = (dateString) => {
             const date = new Date(dateString);
-            const ayIsimleri = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 
-                               'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+            const ayIsimleri = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+                'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
             return `${date.getDate()} ${ayIsimleri[date.getMonth()]} ${date.getFullYear()}`;
         };
-        
+
         const startDate = formatDate(data.recommended_start_date);
         const toplamSure = data.toplam_sure_ay || 0;
         const mevsimTercihi = data.mevsim_tercihi || 'İlkbahar';
@@ -2523,51 +2523,51 @@ async function loadConstructionSchedule(mahalle = null, etap = null) {
         const avgYapim = data.avg_yapim || 18;
         const dateAdjusted = data.date_adjusted || false;
         const adjustmentReason = data.adjustment_reason || '';
-        
+
         // Süreleri gün cinsinden hesapla (timeline genişlikleri için)
         const yikimGun = avgYikim;
         const ruhsatGun = 30; // Sabit
         const insaatGun = avgYapim * 30; // Ay'ı güne çevir
         const toplamGun = yikimGun + ruhsatGun + insaatGun;
-        
+
         // Genişlik yüzdeleri
         const yikimYuzde = (yikimGun / toplamGun) * 100;
         const ruhsatYuzde = (ruhsatGun / toplamGun) * 100;
         const insaatYuzde = (insaatGun / toplamGun) * 100;
-        
+
         // Alternatif tarihleri hesapla
         const recommendedDate = new Date(data.recommended_start_date);
         const alternativeDates = [];
-        
+
         // 1 ay önce
         const alt1 = new Date(recommendedDate);
         alt1.setMonth(alt1.getMonth() - 1);
         alternativeDates.push({ date: alt1, label: '1 Ay Önce' });
-        
+
         // 2 ay önce
         const alt2 = new Date(recommendedDate);
         alt2.setMonth(alt2.getMonth() - 2);
         alternativeDates.push({ date: alt2, label: '2 Ay Önce' });
-        
+
         // 1 ay sonra
         const alt3 = new Date(recommendedDate);
         alt3.setMonth(alt3.getMonth() + 1);
         alternativeDates.push({ date: alt3, label: '1 Ay Sonra' });
-        
+
         // Mevsim sebebi açıklaması
-        const mevsimSebebi = mevsimTercihi === 'İlkbahar' 
+        const mevsimSebebi = mevsimTercihi === 'İlkbahar'
             ? 'İlkbahar ayları (Mart-Nisan-Mayıs) inşaat için en uygun dönemdir. Hava koşulları elverişli ve beton dökümü için ideal sıcaklıklar sağlanır.'
             : mevsimTercihi === 'Yaz'
-            ? 'Yaz ayları (Haziran-Temmuz-Ağustos) hızlı ilerleme sağlar ancak aşırı sıcaklar beton kalitesini etkileyebilir. Gölgelendirme ve su takviyesi gerekebilir.'
-            : mevsimTercihi === 'Sonbahar'
-            ? 'Sonbahar ayları (Eylül-Ekim-Kasım) dengeli bir seçenektir. Hava koşulları genellikle uygundur ancak yağış riski artabilir.'
-            : 'Kış ayları (Aralık-Ocak-Şubat) inşaat için en zorlu dönemdir. Soğuk hava beton dökümünü engelleyebilir ve iş güvenliği riskleri artar.';
-        
+                ? 'Yaz ayları (Haziran-Temmuz-Ağustos) hızlı ilerleme sağlar ancak aşırı sıcaklar beton kalitesini etkileyebilir. Gölgelendirme ve su takviyesi gerekebilir.'
+                : mevsimTercihi === 'Sonbahar'
+                    ? 'Sonbahar ayları (Eylül-Ekim-Kasım) dengeli bir seçenektir. Hava koşulları genellikle uygundur ancak yağış riski artabilir.'
+                    : 'Kış ayları (Aralık-Ocak-Şubat) inşaat için en zorlu dönemdir. Soğuk hava beton dökümünü engelleyebilir ve iş güvenliği riskleri artar.';
+
         // Başlangıç tarihi sebebi
-        const baslangicSebebi = dateAdjusted 
+        const baslangicSebebi = dateAdjusted
             ? adjustmentReason
             : `Önerilen başlangıç tarihi, yıkım süresi (${avgYikim} gün) ve temel kazısı dönemini (30 gün) göz önünde bulundurarak hesaplanmıştır. Temel kazısı ve beton dökümü kış aylarına denk gelmeyecek şekilde planlanmıştır.`;
-        
+
         // Sol taraf (küçültülmüş kartlar)
         const leftSectionHtml = `
             <div class="timeline-left-section">
@@ -2599,7 +2599,7 @@ async function loadConstructionSchedule(mahalle = null, etap = null) {
                 </div>
             </div>
         `;
-        
+
         // Sağ taraf (detaylar - 2 sütunlu)
         const rightSectionHtml = `
             <div class="timeline-right-section">
@@ -2630,7 +2630,7 @@ async function loadConstructionSchedule(mahalle = null, etap = null) {
                 </div>
             </div>
         `;
-        
+
         // Ana içerik (flexbox ile yan yana)
         const mainContentHtml = `
             <div class="timeline-main-content">
@@ -2638,9 +2638,9 @@ async function loadConstructionSchedule(mahalle = null, etap = null) {
                 ${rightSectionHtml}
             </div>
         `;
-        
+
         contentContainer.innerHTML = mainContentHtml;
-        
+
         console.log('İnşaat takvimi başarıyla yüklendi');
     } catch (error) {
         console.error('İnşaat takvimi verisi yüklenemedi:', error);
@@ -2660,7 +2660,7 @@ async function loadConstructionSchedule(mahalle = null, etap = null) {
 async function loadSocialProfile(mahalle = null, etap = null) {
     try {
         console.log('Sosyal profil verisi yükleniyor...');
-        
+
         // Query parametrelerini hazırla
         const params = new URLSearchParams();
         const selectedMahalle = mahalle || currentMahalle;
@@ -2671,25 +2671,25 @@ async function loadSocialProfile(mahalle = null, etap = null) {
         if (selectedEtap) {
             params.append('etap_adi', selectedEtap);
         }
-        
+
         const url = `/api/social-profile${params.toString() ? '?' + params.toString() : ''}`;
         const response = await fetch(url);
-        
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
         console.log('Sosyal profil verisi:', data);
-        
+
         const contentContainer = document.getElementById('socialProfileContent');
         const cardHeader = document.querySelector('.social-card-header');
-        
+
         if (!contentContainer) {
             console.error('socialProfileContent elementi bulunamadı!');
             return;
         }
-        
+
         // Bağlam bilgisi (hangi seviyede gösteriliyor)
         let contextText = '';
         if (currentEtap && currentMahalle) {
@@ -2697,7 +2697,7 @@ async function loadSocialProfile(mahalle = null, etap = null) {
         } else if (currentMahalle) {
             contextText = currentMahalle;
         }
-        
+
         // Kart başlığına mahalle adını ekle
         if (cardHeader) {
             let contextElement = cardHeader.querySelector('.social-card-context');
@@ -2712,7 +2712,7 @@ async function loadSocialProfile(mahalle = null, etap = null) {
                 contextElement.remove();
             }
         }
-        
+
         if (!data || !data.avg_age) {
             console.warn('Sosyal profil verisi bulunamadı:', data);
             contentContainer.innerHTML = `
@@ -2723,13 +2723,13 @@ async function loadSocialProfile(mahalle = null, etap = null) {
             `;
             return;
         }
-        
+
         const avgAge = data.avg_age || 0;
         const dusukYuzde = data.income_distribution.dusuk.yuzde || 0;
         const ortaYuzde = data.income_distribution.orta.yuzde || 0;
         const yuksekYuzde = data.income_distribution.yuksek.yuzde || 0;
         const strategy = data.strategy || { oneri: '', mesaj: '', renk: '#10b981' };
-        
+
         // İçerik HTML - Yaş ortalaması, gelir grafiği ve kampanya dili birlikte
         const contentHtml = `
             <div class="social-content-wrapper">
@@ -2754,40 +2754,40 @@ async function loadSocialProfile(mahalle = null, etap = null) {
                 </div>
             </div>
         `;
-        
+
         contentContainer.innerHTML = contentHtml;
-        
+
         // Chart.js ile Pie Chart oluştur
         setTimeout(() => {
             if (typeof Chart === 'undefined') {
                 console.error('Chart.js yüklenmemiş!');
                 return;
             }
-            
+
             const ctx = document.getElementById('socialIncomeChart');
             if (!ctx) {
                 console.error('socialIncomeChart canvas elementi bulunamadı!');
                 return;
             }
-            
+
             console.log('Gelir dağılımı chart oluşturuluyor - Düşük:', dusukYuzde, 'Orta:', ortaYuzde, 'Yüksek:', yuksekYuzde);
-            
+
             // Eğer önceki chart varsa destroy et
             if (charts.socialIncome) {
                 charts.socialIncome.destroy();
             }
-            
+
             // Eğer veri yoksa, varsayılan değerler göster
             const dusukData = dusukYuzde > 0 ? dusukYuzde : 0;
             const ortaData = ortaYuzde > 0 ? ortaYuzde : 0;
             const yuksekData = yuksekYuzde > 0 ? yuksekYuzde : 0;
-            
+
             // Eğer hiç veri yoksa, eşit dağıt
             const totalData = dusukData + ortaData + yuksekData;
             const finalDusuk = totalData > 0 ? dusukData : 33.3;
             const finalOrta = totalData > 0 ? ortaData : 33.3;
             const finalYuksek = totalData > 0 ? yuksekData : 33.4;
-            
+
             charts.socialIncome = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -2813,7 +2813,7 @@ async function loadSocialProfile(mahalle = null, etap = null) {
                         },
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
+                                label: function (context) {
                                     return context.label + ': %' + context.parsed.y.toFixed(1);
                                 }
                             }
@@ -2829,7 +2829,7 @@ async function loadSocialProfile(mahalle = null, etap = null) {
                                     family: 'Inter',
                                     size: 10
                                 },
-                                callback: function(value) {
+                                callback: function (value) {
                                     return value + '%';
                                 }
                             },
@@ -2852,7 +2852,7 @@ async function loadSocialProfile(mahalle = null, etap = null) {
                     }
                 }
             });
-            
+
             console.log('Gelir dağılımı chart başarıyla oluşturuldu');
         }, 100);
     } catch (error) {
@@ -2875,14 +2875,14 @@ async function init() {
     try {
         initMap();
         setupPage();
-        
+
         document.getElementById('backBtn')?.addEventListener('click', resetToMahalleler);
         document.getElementById('closeBuildingPanel')?.addEventListener('click', closeBuildingPanel);
 
         await loadStatistics();
         await loadMahalleSinirlari();
         await loadUrgentBuildings();
-        
+
         await loadFinancialSummary();
         await loadModelDecision();
         await loadLegalRisk();
@@ -2902,7 +2902,7 @@ async function loadInfrastructureImpact(mahalle = null, etap = null) {
     try {
         let url = '/api/infrastructure-impact';
         const params = new URLSearchParams();
-        
+
         const selectedMahalle = mahalle || currentMahalle;
         const selectedEtap = etap || currentEtap;
         if (selectedMahalle) {
@@ -2911,27 +2911,27 @@ async function loadInfrastructureImpact(mahalle = null, etap = null) {
         if (selectedEtap) {
             params.append('etap_adi', selectedEtap);
         }
-        
+
         if (params.toString()) {
             url += '?' + params.toString();
         }
-        
+
         const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
-        
+
         const data = await response.json();
         console.log('Altyapı etki simülasyonu verisi:', data);
-        
+
         const contentContainer = document.getElementById('infrastructureImpactContent');
         const cardHeader = document.querySelector('.infrastructure-card-header');
-        
+
         if (!contentContainer) {
             console.error('infrastructureImpactContent elementi bulunamadı!');
             return;
         }
-        
+
         // Bağlam bilgisi (hangi seviyede gösteriliyor)
         let contextText = '';
         if (currentEtap && currentMahalle) {
@@ -2939,7 +2939,7 @@ async function loadInfrastructureImpact(mahalle = null, etap = null) {
         } else if (currentMahalle) {
             contextText = currentMahalle;
         }
-        
+
         // Kart başlığına mahalle adını ekle
         if (cardHeader) {
             let contextElement = cardHeader.querySelector('.infrastructure-card-context');
@@ -2954,7 +2954,7 @@ async function loadInfrastructureImpact(mahalle = null, etap = null) {
                 contextElement.remove();
             }
         }
-        
+
         if (!data || !data.population) {
             console.warn('Altyapı etki simülasyonu verisi bulunamadı:', data);
             contentContainer.innerHTML = `
@@ -2965,9 +2965,9 @@ async function loadInfrastructureImpact(mahalle = null, etap = null) {
             `;
             return;
         }
-        
+
         const { population, infrastructure, message } = data;
-        
+
         // İstatistik kartları HTML
         const statsHtml = `
             <div class="infrastructure-stats-grid">
@@ -2988,7 +2988,7 @@ async function loadInfrastructureImpact(mahalle = null, etap = null) {
                 </div>
             </div>
         `;
-        
+
         // Uyarı kutusu HTML
         const alertClass = infrastructure.school_need.status === 'CRITICAL' ? 'infrastructure-alert-critical' : 'infrastructure-alert-ok';
         const alertHtml = `
@@ -2997,9 +2997,9 @@ async function loadInfrastructureImpact(mahalle = null, etap = null) {
                 <div class="infrastructure-alert-message">${message}</div>
             </div>
         `;
-        
+
         contentContainer.innerHTML = statsHtml + alertHtml;
-        
+
     } catch (error) {
         console.error('Altyapı etki simülasyonu verisi yüklenemedi:', error);
         const contentContainer = document.getElementById('infrastructureImpactContent');
@@ -3043,9 +3043,9 @@ function closeReportModal() {
 async function loadReportOptions() {
     const mahalleSelect = document.getElementById('reportMahalle');
     const etapSelect = document.getElementById('reportEtap');
-    
+
     if (!mahalleSelect || !etapSelect) return;
-    
+
     // Mahalleleri yükle
     mahalleSelect.innerHTML = '<option value="">Tüm Mahalleler</option>';
     if (allMahalleler && allMahalleler.length > 0) {
@@ -3056,12 +3056,12 @@ async function loadReportOptions() {
             mahalleSelect.appendChild(option);
         });
     }
-    
+
     // Etapları yükle (mahalle seçilince)
     mahalleSelect.addEventListener('change', async () => {
         const selectedMahalle = mahalleSelect.value;
         etapSelect.innerHTML = '<option value="">Tüm Etaplar</option>';
-        
+
         if (selectedMahalle) {
             try {
                 const response = await fetch(`/api/etaplar?mahalle_adi=${encodeURIComponent(selectedMahalle)}`);
@@ -3085,18 +3085,18 @@ async function loadReportOptions() {
 document.getElementById('generateReportBtn')?.addEventListener('click', async () => {
     const mahalle = document.getElementById('reportMahalle')?.value || '';
     const etap = document.getElementById('reportEtap')?.value || '';
-    
+
     if (!mahalle && !etap) {
         alert('Lütfen en az bir mahalle veya etap seçin.');
         return;
     }
-    
+
     try {
         // Tüm verileri topla
         const reportParams = new URLSearchParams();
         if (mahalle) reportParams.append('mahalle_adi', mahalle);
         if (etap) reportParams.append('etap_adi', etap);
-        
+
         const [financial, model, legal, schedule, social, infrastructure, urgent] = await Promise.all([
             fetch(`/api/financial-summary?${reportParams}`).then(r => r.json()),
             fetch(`/api/strategy-decision?${reportParams}`).then(r => r.json()),
@@ -3106,7 +3106,7 @@ document.getElementById('generateReportBtn')?.addEventListener('click', async ()
             fetch(`/api/infrastructure-impact?${reportParams}`).then(r => r.json()),
             fetch(`/api/urgent-buildings?${reportParams}`).then(r => r.json())
         ]);
-        
+
         reportData = {
             mahalle,
             etap,
@@ -3118,7 +3118,7 @@ document.getElementById('generateReportBtn')?.addEventListener('click', async ()
             infrastructure,
             urgent
         };
-        
+
         generateReportPreview();
         document.getElementById('reportPreview').style.display = 'block';
     } catch (error) {
@@ -3131,16 +3131,16 @@ document.getElementById('generateReportBtn')?.addEventListener('click', async ()
 function generateReportPreview() {
     const preview = document.getElementById('reportPreviewContent');
     if (!preview || !reportData) return;
-    
+
     const { mahalle, etap, financial, model, legal, schedule, social, infrastructure, urgent } = reportData;
-    
+
     const reportTitle = etap ? `${mahalle} - ${etap}` : mahalle || 'Tüm İlçe';
-    const reportDate = new Date().toLocaleDateString('tr-TR', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
+    const reportDate = new Date().toLocaleDateString('tr-TR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
     });
-    
+
     let html = `
         <div style="margin-bottom: 30px;">
             <h1 style="font-size: 24px; color: var(--accent-cyan); margin-bottom: 8px;">Bayraklı KDS Raporu</h1>
@@ -3312,14 +3312,14 @@ function generateReportPreview() {
             </div>
         </div>
     `;
-    
+
     preview.innerHTML = html;
 }
 
 // PDF indirme
 document.getElementById('downloadReportBtn')?.addEventListener('click', () => {
     if (!reportData) return;
-    
+
     // jsPDF kütüphanesi yüklü mü kontrol et
     if (typeof window.jsPDF === 'undefined') {
         // jsPDF CDN'den yükle
@@ -3357,22 +3357,22 @@ function formatNumber(num) {
 async function downloadPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    
+
     // Türkçe karakter desteği için encoding ayarları
     // jsPDF'in varsayılan fontları Türkçe karakterleri desteklemediği için
     // 'helvetica' fontunu kullanıyoruz ve metinleri doğrudan kullanıyoruz
     // Not: jsPDF'in varsayılan fontları Türkçe karakterleri desteklemediği için
     // karakterler bozuk görünebilir. İdeal çözüm özel font eklemektir.
     doc.setFont('helvetica');
-    
+
     const { mahalle, etap, financial, model, legal, schedule, social, infrastructure, urgent } = reportData;
     const reportTitle = etap ? `${mahalle} - ${etap}` : mahalle || 'Tum Ilce';
     const reportDate = new Date().toLocaleDateString('tr-TR');
-    
+
     let y = 20;
     const pageHeight = doc.internal.pageSize.height;
     const margin = 20;
-    
+
     // Türkçe karakterleri ASCII karakterlere çeviren yardımcı fonksiyon
     // jsPDF'in varsayılan fontları Türkçe karakterleri desteklemediği için
     // Türkçe karakterleri ASCII karakterlere çeviriyoruz
@@ -3386,7 +3386,7 @@ async function downloadPDF() {
             .replace(/ö/g, 'o').replace(/Ö/g, 'O')
             .replace(/ç/g, 'c').replace(/Ç/g, 'C');
     }
-    
+
     // Sayfa sonu kontrolü ve yeni sayfa ekleme
     function checkPageBreak(requiredSpace = 20) {
         if (y + requiredSpace > pageHeight - margin) {
@@ -3394,25 +3394,25 @@ async function downloadPDF() {
             y = 20;
         }
     }
-    
+
     // Başlık
     doc.setFontSize(20);
     doc.setTextColor(6, 182, 212);
     doc.text(encodeTurkish('Bayraklı KDS Raporu'), 14, y);
     y += 10;
-    
+
     doc.setFontSize(12);
     doc.setTextColor(100, 100, 100);
     doc.text(encodeTurkish(`${reportTitle} • ${reportDate}`), 14, y);
     y += 15;
-    
+
     // Finansal Fizibilite
     checkPageBreak(30);
     doc.setFontSize(16);
     doc.setTextColor(0, 0, 0);
     doc.text(encodeTurkish('Finansal Fizibilite'), 14, y);
     y += 10;
-    
+
     doc.setFontSize(11);
     const toplamYatirim = formatNumber(financial?.toplam_yatirim || 0);
     doc.text(encodeTurkish(`Toplam Yatırım: ${toplamYatirim} TL`), 14, y);
@@ -3422,18 +3422,18 @@ async function downloadPDF() {
     y += 7;
     doc.text(encodeTurkish(`Toplam Bina Sayısı: ${(financial?.toplam_bina || 0).toLocaleString('tr-TR')}`), 14, y);
     y += 15;
-    
+
     // Yapılaşma Stratejisi
     checkPageBreak(50);
     doc.setFontSize(16);
     doc.text(encodeTurkish('Yapılaşma Stratejisi Analizi'), 14, y);
     y += 10;
-    
+
     doc.setFontSize(12);
     doc.setFont(undefined, 'bold');
     doc.text(encodeTurkish(`Sistem Önerisi: ${model?.sistem_onerisi || 'N/A'}`), 14, y);
     y += 8;
-    
+
     doc.setFontSize(11);
     doc.setFont(undefined, 'normal');
     doc.text(encodeTurkish('Gerekçe:'), 14, y);
@@ -3447,23 +3447,23 @@ async function downloadPDF() {
         y += 7;
     });
     y += 10;
-    
+
     if (model?.zemin_risk_puani !== undefined) {
         checkPageBreak(7);
         doc.text(encodeTurkish(`Zemin Risk Puanı: ${model.zemin_risk_puani.toFixed(2)}`), 14, y);
         y += 7;
     }
-    
+
     if (model?.talep_dagilimi) {
         checkPageBreak(25);
         doc.text(encodeTurkish('Talep Dağılımı:'), 14, y);
         y += 7;
-        
+
         const talepYerinde = model.talep_dagilimi.yerinde || { sayi: 0, yuzde: 0 };
         const talepRezerv = model.talep_dagilimi.rezerv || { sayi: 0, yuzde: 0 };
         const talepNakit = model.talep_dagilimi.nakit || { sayi: 0, yuzde: 0 };
         const toplamTalep = model.talep_dagilimi.toplam || 0;
-        
+
         if (talepYerinde.sayi > 0 || talepYerinde.yuzde > 0) {
             checkPageBreak(7);
             doc.text(encodeTurkish(`  - Yerinde Dönüşüm: ${talepYerinde.sayi} kişi (${talepYerinde.yuzde}%)`), 14, y);
@@ -3486,13 +3486,13 @@ async function downloadPDF() {
         }
     }
     y += 8;
-    
+
     // Hukuki Tıkanıklık
     checkPageBreak(40);
     doc.setFontSize(16);
     doc.text(encodeTurkish('Hukuki Tıkanıklık İndeksi'), 14, y);
     y += 10;
-    
+
     doc.setFontSize(11);
     const riskScore = legal?.risk_score || legal?.riskScore || 0;
     doc.text(encodeTurkish(`Risk Skoru: ${riskScore.toFixed(2)}%`), 14, y);
@@ -3515,13 +3515,13 @@ async function downloadPDF() {
         y += 3;
     }
     y += 8;
-    
+
     // Zaman Çizelgesi
     checkPageBreak(50);
     doc.setFontSize(16);
     doc.text(encodeTurkish('Operasyonel Zaman Çizelgesi ve Mevsim Analizi'), 14, y);
     y += 10;
-    
+
     doc.setFontSize(11);
     const startDate = schedule?.recommended_start_date ? new Date(schedule.recommended_start_date).toLocaleDateString('tr-TR') : 'N/A';
     doc.text(encodeTurkish(`Önerilen Başlangıç: ${startDate}`), 14, y);
@@ -3530,7 +3530,7 @@ async function downloadPDF() {
     y += 7;
     doc.text(encodeTurkish(`İdeal Mevsim: ${schedule?.mevsim_tercihi || 'N/A'}`), 14, y);
     y += 7;
-    
+
     if (schedule?.date_adjusted && schedule?.adjustment_reason) {
         checkPageBreak(10);
         doc.setTextColor(245, 158, 11);
@@ -3544,7 +3544,7 @@ async function downloadPDF() {
         doc.setTextColor(0, 0, 0);
         y += 3;
     }
-    
+
     if (schedule?.phases) {
         checkPageBreak(20);
         doc.text(encodeTurkish('Proje Aşamaları:'), 14, y);
@@ -3566,18 +3566,18 @@ async function downloadPDF() {
         }
     }
     y += 8;
-    
+
     // Hak Sahibi Profili
     checkPageBreak(50);
     doc.setFontSize(16);
     doc.text(encodeTurkish('Hak Sahibi Profili ve İkna Stratejisi'), 14, y);
     y += 10;
-    
+
     doc.setFontSize(11);
     const yasOrtalamasi = social?.avg_age ? Math.round(social.avg_age) : 0;
     doc.text(encodeTurkish(`Yaş Ortalaması: ${yasOrtalamasi} Yaş`), 14, y);
     y += 7;
-    
+
     if (social && social.income_distribution) {
         checkPageBreak(30);
         doc.text(encodeTurkish('Gelir Dağılımı:'), 14, y);
@@ -3604,14 +3604,14 @@ async function downloadPDF() {
             y += 6;
         }
     }
-    
+
     checkPageBreak(25);
     doc.setFont(undefined, 'bold');
     const kampanyaOneri = social?.strategy?.oneri || 'N/A';
     doc.text(encodeTurkish(`Önerilen Kampanya Dili: ${kampanyaOneri}`), 14, y);
     doc.setFont(undefined, 'normal');
     y += 7;
-    
+
     checkPageBreak(20);
     const kampanyaMesaj = social?.strategy?.mesaj || 'Veri bulunamadı.';
     const mesajLines = doc.splitTextToSize(encodeTurkish(kampanyaMesaj), 180);
@@ -3621,13 +3621,13 @@ async function downloadPDF() {
         y += 7;
     });
     y += 8;
-    
+
     // Şehircilik Etki
     checkPageBreak(40);
     doc.setFontSize(16);
     doc.text(encodeTurkish('Şehircilik Etki Simülasyonu'), 14, y);
     y += 10;
-    
+
     doc.setFontSize(11);
     const mevcutNufus = Math.round(infrastructure?.population?.current || 0);
     const mevcutNufusStr = mevcutNufus.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
@@ -3639,7 +3639,7 @@ async function downloadPDF() {
     const nufusArtis = infrastructure?.population?.change_rate || 0;
     doc.text(encodeTurkish(`Gelecek Nüfus: ${gelecekNufusStr} (+${nufusArtis}% artış)`), 14, y);
     y += 7;
-    
+
     if (infrastructure?.infrastructure?.school_need) {
         checkPageBreak(7);
         const mevcutOkul = Math.round(infrastructure.infrastructure.school_need.current || 0);
@@ -3654,14 +3654,14 @@ async function downloadPDF() {
             y += 7;
         }
     }
-    
+
     if (infrastructure?.infrastructure?.green_space) {
         checkPageBreak(7);
         const yesilAlanHektar = parseFloat(infrastructure.infrastructure.green_space.required_hectar || 0);
         doc.text(encodeTurkish(`Yeşil Alan İhtiyacı: ${yesilAlanHektar.toFixed(2)} hektar`), 14, y);
         y += 7;
     }
-    
+
     checkPageBreak(15);
     const infraMesaj = infrastructure?.message || 'Veri bulunamadı.';
     const infraMesajLines = doc.splitTextToSize(encodeTurkish(infraMesaj), 180);
@@ -3671,13 +3671,13 @@ async function downloadPDF() {
         y += 7;
     });
     y += 8;
-    
+
     // Acil Müdahale Listesi
     checkPageBreak(40);
     doc.setFontSize(16);
     doc.text(encodeTurkish('Acil Müdahale Listesi'), 14, y);
     y += 10;
-    
+
     doc.setFontSize(11);
     if (urgent && urgent.length > 0) {
         urgent.slice(0, 10).forEach((bina, idx) => {
@@ -3693,7 +3693,7 @@ async function downloadPDF() {
     } else {
         doc.text(encodeTurkish('Acil müdahale gerektiren bina bulunamadı.'), 14, y);
     }
-    
+
     // PDF'i indir
     const fileName = `Bayrakli_KDS_Raporu_${reportTitle.replace(/[ğĞüÜşŞıİöÖçÇ\s]/g, (m) => {
         const map = { 'ğ': 'g', 'Ğ': 'G', 'ü': 'u', 'Ü': 'U', 'ş': 's', 'Ş': 'S', 'ı': 'i', 'İ': 'I', 'ö': 'o', 'Ö': 'O', 'ç': 'c', 'Ç': 'C', ' ': '_' };
